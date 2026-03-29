@@ -1,0 +1,782 @@
+# ============================================================================
+# SHARD: biomem-risk.aln
+# PATH:  spec/biomem-risk.aln
+# VER:   1.0.0
+# LIC:   Data_Lake Sovereign License
+# DESC:  ALN shard specification for data-risk assessment and housing-
+#        protection oversight. Defines RoH ceilings, per-ROI risk limits,
+#        safety strength requirements, and neurorights enforcement.
+# ============================================================================
+
+@shard biomem.risk.v1
+@version 1.0.0
+@created 2024-01-15T00:00:00Z
+@author Data_Lake Sovereign Research
+@license MIT-Sovereign
+@compatibility biomem-core>=1.0.0, biomem-encoder>=1.0.0, biomem-5d.aln>=1.0.0, biomem-evolution.aln>=1.0.0
+
+# ============================================================================
+# SECTION: RISK CLASSIFICATION TAXONOMY
+# ============================================================================
+
+@section risk_taxonomy
+
+# Risk severity levels for trace classification
+@enum RiskSeverity
+  value: negligible
+    range: [0.0, 0.10]
+    description: No meaningful risk; safe for all operations
+    export_allowed: true
+    storage_class: standard
+  end
+
+  value: low
+    range: (0.10, 0.20]
+    description: Minimal risk; standard safeguards apply
+    export_allowed: true
+    storage_class: standard
+  end
+
+  value: moderate
+    range: (0.20, 0.30]
+    description: Moderate risk; enhanced monitoring required
+    export_allowed: true
+    storage_class: protected
+    additional_requirements:
+      - audit_logging: enabled
+      - access_control: capability_based
+  end
+
+  value: elevated
+    range: (0.30, 0.50]
+    description: Elevated risk; export restricted
+    export_allowed: false
+    storage_class: restricted
+    additional_requirements:
+      - audit_logging: enabled
+      - access_control: multi_factor
+      - curator_approval: required
+  end
+
+  value: high
+    range: (0.50, 0.75]
+    description: High risk; local processing only
+    export_allowed: false
+    storage_class: quarantined
+    additional_requirements:
+      - audit_logging: enabled
+      - access_control: multi_factor
+      - curator_approval: required
+      - isolation: mandatory
+  end
+
+  value: critical
+    range: (0.75, 1.0]
+    description: Critical risk; immediate intervention required
+    export_allowed: false
+    storage_class: quarantined
+    additional_requirements:
+      - audit_logging: enabled
+      - access_control: multi_factor
+      - curator_approval: required
+      - isolation: mandatory
+      - immediate_review: required
+  end
+@end
+
+# Risk categories for trace classification
+@enum RiskCategory
+  value: physiological
+    description: Risk arising from physiological signal interpretation
+    examples: [HRV_anomaly, EEG_artifact, signal_noise]
+  end
+
+  value: cognitive
+    description: Risk arising from cognitive state inference
+    examples: [attention_decoding, memory_reconstruction, intent_prediction]
+  end
+
+  value: behavioral
+    description: Risk arising from behavioral pattern analysis
+    examples: [movement_prediction, decision_inference, habit_modeling]
+  end
+
+  value: identity
+    description: Risk arising from identity or biometric inference
+    examples: [person_reidentification, biometric_extraction, unique_signature]
+  end
+
+  value: sovereignty
+    description: Risk arising from augmented-citizen sovereignty violation
+    examples: [unauthorized_access, data_extraction, control_loss]
+  end
+@end
+
+# ============================================================================
+# SECTION: RISK-OF-HARM (RoH) CEILINGS
+# ============================================================================
+
+@section roh_ceilings
+
+# Global RoH ceiling for all exportable traces
+@ceiling roh_global
+  field: trace.roh
+  maximum: 0.30
+  severity: critical
+  enforcement: hard
+  violation_action: reject_trace
+  description: Maximum RoH allowed for any exportable MemoryTrace
+  exception_policy: curatorial_board_approval_required
+  audit_requirement: per_trace
+@end
+
+# Per-ROI RoH ceilings (region-specific risk limits)
+@ceiling roh_per_roi
+  region: hippocampus
+    maximum: 0.25
+    rationale: Memory encoding region; heightened privacy protection
+    enforcement: hard
+  end
+
+  region: amygdala
+    maximum: 0.20
+    rationale: Emotional processing; sensitive affective data
+    enforcement: hard
+  end
+
+  region: prefrontal_cortex
+    maximum: 0.30
+    rationale: Executive function; decision-making data
+    enforcement: hard
+  end
+
+  region: motor_cortex
+    maximum: 0.35
+    rationale: Motor control; lower sensitivity
+    enforcement: moderate
+  end
+
+  region: visual_cortex
+    maximum: 0.35
+    rationale: Visual processing; moderate sensitivity
+    enforcement: moderate
+  end
+
+  region: auditory_cortex
+    maximum: 0.35
+    rationale: Auditory processing; moderate sensitivity
+    enforcement: moderate
+  end
+
+  region: unassigned
+    maximum: 0.30
+    rationale: Default ceiling for unspecified regions
+    enforcement: hard
+  end
+@end
+
+# RoH escalation thresholds for monitoring
+@threshold roh_escalation
+  level: 1
+    range: (0.20, 0.25]
+    action: log_and_monitor
+    notification: dashboard_alert
+  end
+
+  level: 2
+    range: (0.25, 0.28]
+    action: enhanced_monitoring
+    notification: email_alert
+    review_required: true
+  end
+
+  level: 3
+    range: (0.28, 0.30]
+    action: curator_notification
+    notification: immediate_alert
+    review_required: true
+    export_restricted: true
+  end
+
+  level: 4
+    range: > 0.30
+    action: reject_and_quarantine
+    notification: critical_alert
+    review_required: true
+    export_restricted: true
+    isolation_mandatory: true
+  end
+@end
+
+# ============================================================================
+# SECTION: SAFETY STRENGTH REQUIREMENTS
+# ============================================================================
+
+@section safety_strength
+
+# Minimum safety strength for trace operations
+@requirement safety_minimum
+  operation: trace_create
+    minimum: 0.50
+    description: Minimum safety for trace creation
+    enforcement: hard
+  end
+
+  operation: trace_store
+    minimum: 0.60
+    description: Minimum safety for local storage
+    enforcement: hard
+  end
+
+  operation: trace_export_local
+    minimum: 0.75
+    description: Minimum safety for local network export
+    enforcement: hard
+  end
+
+  operation: trace_export_remote
+    minimum: 0.85
+    description: Minimum safety for remote/cloud export
+    enforcement: hard
+  end
+
+  operation: trace_share
+    minimum: 0.90
+    description: Minimum safety for sharing with third parties
+    enforcement: hard
+  end
+
+  operation: trace_public
+    minimum: 0.95
+    description: Minimum safety for public release
+    enforcement: hard
+  end
+@end
+
+# Safety strength degradation monitoring
+@monitor safety_degradation
+  metric: safety_strength_delta
+  threshold: -0.05
+  window: 24_hours
+  action: alert_and_review
+  description: Alert if safety strength decreases by more than 5% in 24 hours
+  escalation:
+    - first_occurrence: warning
+    - second_occurrence: curator_notification
+    - third_occurrence: quarantine_trace
+@end
+
+# Safety strength improvement incentives
+@incentive safety_improvement
+  metric: safety_strength_delta
+  threshold: +0.10
+  window: 30_days
+  reward: capability_score_bonus
+  bonus_amount: 0.02
+  description: Reward decoders that improve safety strength by 10% in 30 days
+  verification: benchmark_required
+@end
+
+# ============================================================================
+# SECTION: HOUSING-PROTECTION OVERSIGHT
+# ============================================================================
+
+@section housing_protection
+
+# Housing-protection classification for trace storage
+@classification housing_protection
+  level: standard
+    description: Standard protection for low-risk traces
+    requirements:
+      - encryption_at_rest: aes256
+      - encryption_in_transit: tls1.3
+      - access_logging: enabled
+      - backup_frequency: daily
+    applicable_roh_range: [0.0, 0.20]
+  end
+
+  level: protected
+    description: Enhanced protection for moderate-risk traces
+    requirements:
+      - encryption_at_rest: aes256
+      - encryption_in_transit: tls1.3
+      - access_logging: enabled
+      - backup_frequency: hourly
+      - access_control: capability_based
+      - audit_trail: immutable
+    applicable_roh_range: (0.20, 0.30]
+  end
+
+  level: restricted
+    description: Restricted protection for elevated-risk traces
+    requirements:
+      - encryption_at_rest: aes256_gcm
+      - encryption_in_transit: tls1.3_mtls
+      - access_logging: enabled
+      - backup_frequency: real_time
+      - access_control: multi_factor
+      - audit_trail: immutable
+      - isolation: network_segment
+      - curator_approval: required_for_access
+    applicable_roh_range: (0.30, 0.50]
+  end
+
+  level: quarantined
+    description: Quarantine for high/critical-risk traces
+    requirements:
+      - encryption_at_rest: aes256_gcm
+      - encryption_in_transit: tls1.3_mtls
+      - access_logging: enabled
+      - backup_frequency: real_time
+      - access_control: multi_factor
+      - audit_trail: immutable
+      - isolation: air_gapped
+      - curator_approval: required_for_access
+      - immediate_review: mandatory
+    applicable_roh_range: (0.50, 1.0]
+  end
+@end
+
+# Housing-protection node requirements
+@requirement node_requirements
+  node_type: prometheus
+    description: Prometheus monitoring node for housing oversight
+    requirements:
+      - scrape_interval: 15s
+      - retention_days: 90
+      - alert_manager: enabled
+      - grafana_dashboard: required
+    metrics_export:
+      - biomem_roh_current
+      - biomem_safety_strength_current
+      - biomem_housing_protection_level
+  end
+
+  node_type: reality_os
+    description: Reality.os visualization node for trace inspection
+    requirements:
+      - 3d_rendering: enabled
+      - trace_inspection: enabled
+      - audit_overlay: enabled
+    access_control: capability_based
+  end
+
+  node_type: bostrom
+    description: Bostrom simulation node for hypothetical modeling
+    requirements:
+      - sandbox_isolation: mandatory
+      - no_export: enforced
+      - simulation_logging: complete
+    applicable_traces: research_only
+  end
+
+  node_type: organichain
+    description: Organichain node for decentralized storage
+    requirements:
+      - consensus_validation: required
+      - shard_replication: 3x_minimum
+      - on_chain_proof: required
+    applicable_traces: sovereign_class
+  end
+@end
+
+# ============================================================================
+# SECTION: NEURORIGHTS ENFORCEMENT
+# ============================================================================
+
+@section neurorights
+
+# Augmented-citizen neurorights enumeration
+@rights neurorights_enumeration
+  right: cognitive_liberty
+    description: Right to self-determination over mental processes
+    enforcement: trace_consent_required
+    violation_action: reject_and_notify
+  end
+
+  right: mental_privacy
+    description: Right to protection of mental data from unauthorized access
+    enforcement: encryption_mandatory
+    violation_action: quarantine_and_audit
+  end
+
+  right: psychological_continuity
+    description: Right to maintain psychological identity integrity
+    enforcement: monotonicity_guarantee
+    violation_action: reject_update
+  end
+
+  right: fair_mental_augmentation
+    description: Right to equitable access to cognitive enhancement
+    enforcement: nfa_non_discrimination
+    violation_action: curatorial_review
+  end
+
+  right: protection_from_algorithmic_bias
+    description: Right to protection from biased mental state inference
+    enforcement: bias_audit_required
+    violation_action: decoder_suspension
+  end
+
+  right: right_to_audit
+    description: Right to audit all processing of neural data
+    enforcement: audit_log_immutable
+    violation_action: compliance_review
+  end
+
+  right: right_to_portability
+    description: Right to export neural data in standard format
+    enforcement: export_format_standardized
+    violation_action: remediation_required
+  end
+
+  right: right_to_revoke
+    description: Right to revoke consent for neural data processing
+    enforcement: revocation_mechanism_available
+    violation_action: immediate cessation
+    constraint: monotonicity_preservation
+  end
+@end
+
+# Neurorights violation detection rules
+@rule neurorights_violation_detection
+  trigger: on_trace_operation
+  detection_rules:
+    - rule: unauthorized_access_attempt
+      condition: access_request without valid_capability
+      action: block_and_alert
+      severity: critical
+    - rule: consent_expired
+      condition: trace_consent_timestamp < current_timestamp - consent_duration
+      action: block_and_notify
+      severity: high
+    - rule: export_without_approval
+      condition: trace.roh > 0.30 AND export_requested AND NOT curator_approved
+      action: block_and_alert
+      severity: critical
+    - rule: safety_below_minimum
+      condition: trace.safety_strength < operation_minimum
+      action: block_and_alert
+      severity: high
+    - rule: monotonicity_violation
+      condition: capability_score[current] < capability_score[prev]
+      action: reject_and_audit
+      severity: critical
+  end
+@end
+
+# Neurorights compliance certification
+@certification neurorights_compliance
+  requirements:
+    - all_traces_consent_verified
+    - all_exports_encrypted
+    - all_access_logged
+    - all_updates_monotonic
+    - all_violations_reported
+  audit_frequency: continuous
+  certification_body: Data_Lake_Sovereign_Authority
+  validity_period: 1_year
+  renewal_requirement: full_audit
+@end
+
+# ============================================================================
+# SECTION: DATA SOVEREIGNTY GUARANTEES
+# ============================================================================
+
+@section data_sovereignty
+
+# Sovereignty classification for traces
+@classification sovereignty_class
+  level: sovereign
+    description: Full augmented-citizen sovereignty control
+    requirements:
+      - citizen_consent: required
+      - citizen_audit_access: guaranteed
+      - citizen_revocation_right: enforced
+      - data_portability: guaranteed
+      - storage_location: citizen_choice
+    applicable_traces: all_personal_neural_data
+  end
+
+  level: shared_sovereign
+    description: Shared sovereignty with research institution
+    requirements:
+      - citizen_consent: required
+      - institution_access: limited_by_contract
+      - citizen_audit_access: guaranteed
+      - data_use_restriction: contract_enforced
+    applicable_traces: research_participation_data
+  end
+
+  level: public_good
+    description: De-identified data for public benefit
+    requirements:
+      - deidentification: verified
+      - reidentification_risk: < 0.01
+      - public_access: controlled
+      - attribution: required
+    applicable_traces: aggregated_anonymized_data
+  end
+@end
+
+# Sovereignty enforcement mechanisms
+@enforcement sovereignty_enforcement
+  mechanism: smart_contract
+    description: ALN-Blockchain smart contracts enforce sovereignty rules
+    capabilities:
+      - consent_verification
+      - access_control
+      - audit_logging
+      - revocation_processing
+    platform: ALN_Blockchain
+  end
+
+  mechanism: cryptographic_proof
+    description: Cryptographic proofs verify sovereignty compliance
+    capabilities:
+      - zero_knowledge_consent
+      - verifiable_credentials
+      - audit_trail_integrity
+    algorithms:
+      - ed25519_signatures
+      - sha256_hashes
+      - zk_snarks_optional
+  end
+
+  mechanism: curatorial_oversight
+    description: Human curatorial board oversees sovereignty disputes
+    capabilities:
+      - dispute_resolution
+      - exception_approval
+      - policy_interpretation
+    composition:
+      - minimum_members: 5
+      - expertise: [law, neuroscience, cryptography, ethics]
+      - term_length: 2_years
+  end
+@end
+
+# ============================================================================
+# SECTION: RISK ASSESSMENT METRICS
+# ============================================================================
+
+@section risk_metrics
+
+# Prometheus metrics for risk monitoring
+@metrics prometheus_risk_export
+  biomem_roh_current: gauge(trace.roh)
+  biomem_roh_ceiling: gauge(0.30)
+  biomem_roh_margin: gauge(0.30 - trace.roh)
+  biomem_safety_strength_current: gauge(trace.safety_strength)
+  biomem_safety_strength_minimum: gauge(operation_minimum)
+  biomem_safety_margin: gauge(trace.safety_strength - operation_minimum)
+  biomem_housing_protection_level: gauge(housing_protection_level_enum)
+  biomem_neurorights_violations_total: counter(neurorights_violation_events)
+  biomem_risk_escalation_events_total: counter(risk_escalation_events)
+  biomem_trace_quarantined_total: counter(trace_quarantine_events)
+  biomem_curator_reviews_pending: gauge(pending_curator_reviews)
+  biomem_consent_expirations_soon: gauge(consents_expiring_24h)
+  biomem_export_requests_blocked: counter(blocked_export_requests)
+  biomem_access_violations_total: counter(unauthorized_access_attempts)
+@end
+
+# Risk assessment dashboard configuration
+@dashboard risk_dashboard
+  panels:
+    - panel: roh_distribution
+      type: histogram
+      metric: biomem_roh_current
+      bucket_range: [0.0, 1.0]
+      bucket_count: 20
+    - panel: safety_strength_trend
+      type: time_series
+      metric: biomem_safety_strength_current
+      time_range: 24h
+    - panel: housing_protection_breakdown
+      type: pie_chart
+      metric: biomem_housing_protection_level
+    - panel: neurorights_violations_timeline
+      type: time_series
+      metric: biomem_neurorights_violations_total
+      time_range: 7d
+    - panel: risk_escalation_heatmap
+      type: heatmap
+      metrics: [biomem_roh_current, biomem_risk_escalation_events_total]
+    - panel: curator_review_queue
+      type: table
+      metric: biomem_curator_reviews_pending
+      columns: [trace_id, roh, safety, category, submitted_at]
+  end
+@end
+
+# ============================================================================
+# SECTION: COMPLIANCE CERTIFICATION
+# ============================================================================
+
+@section compliance
+
+@certification roh_ceiling_enforced
+  description: All traces must satisfy RoH ceiling constraints
+  enforcement_mechanism: ALN_smart_contracts + encoder_validation
+  violation_consequences:
+    - trace_rejected
+    - encoder_flagged
+    - auditor_notification
+  audit_frequency: per_trace
+@end
+
+@certification housing_protection_maintained
+  description: All traces must be stored with appropriate housing protection
+  enforcement_mechanism: storage_layer_validation + monitoring
+  violation_consequences:
+    - storage_remediation_required
+    - compliance_review
+    - potential_legal_action
+  audit_frequency: continuous
+@end
+
+@certification neurorights_protected
+  description: All augmented-citizen neurorights must be enforced
+  enforcement_mechanism: smart_contracts + curatorial_oversight
+  violation_consequences:
+    - operation_blocked
+    - curator_notification
+    - potential_legal_action
+    - decoder_suspension
+  audit_frequency: continuous
+@end
+
+@certification sovereignty_guaranteed
+  description: All traces must maintain augmented-citizen sovereignty
+  enforcement_mechanism: cryptographic_proofs + smart_contracts
+  violation_consequences:
+    - sovereignty_restoration_required
+    - compensation_mandatory
+    - legal_accountability
+  audit_frequency: per_operation
+@end
+
+# ============================================================================
+# SECTION: EXTERNAL SYSTEM INTEGRATION
+# ============================================================================
+
+@section external_integration
+
+# Prometheus monitoring integration
+@monitoring prometheus_integration
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  alert_rules:
+    - alert: RoHCeilingBreached
+      expr: biomem_roh_current > 0.30
+      for: 0m
+      severity: critical
+      annotations:
+        summary: "RoH ceiling breached for trace {{ $labels.trace_id }}"
+        description: "Trace RoH {{ $value }} exceeds maximum 0.30"
+    - alert: SafetyStrengthLow
+      expr: biomem_safety_strength_current < 0.75
+      for: 5m
+      severity: warning
+      annotations:
+        summary: "Safety strength below minimum for trace {{ $labels.trace_id }}"
+        description: "Trace safety {{ $value }} below minimum 0.75"
+    - alert: NeurorightsViolation
+      expr: increase(biomem_neurorights_violations_total[1h]) > 0
+      for: 0m
+      severity: critical
+      annotations:
+        summary: "Neurorights violation detected"
+        description: "{{ $value }} neurorights violations in the last hour"
+    - alert: HousingProtectionMismatch
+      expr: biomem_roh_current > 0.30 AND biomem_housing_protection_level < 3
+      for: 0m
+      severity: critical
+      annotations:
+        summary: "Housing protection level mismatch"
+        description: "High-risk trace with insufficient protection level"
+  end
+@end
+
+# ALN-Blockchain smart contract hooks
+@blockchain smart_contract_hooks
+  on_trace_create:
+    - verify_roh_ceiling
+    - verify_safety_strength
+    - record_housing_protection_level
+    - emit_neurorights_attestation
+  on_trace_export:
+    - verify_consent_valid
+    - verify_safety_strength_minimum
+    - verify_curator_approval_if_required
+    - record_export_event
+  on_trace_access:
+    - verify_capability_token
+    - log_access_event
+    - check_rate_limits
+  on_neurorights_violation:
+    - emit_violation_event
+    - notify_curatorial_board
+    - quarantine_if_critical
+    - initiate_audit
+  end
+@end
+
+# SKO (Sovereign Knowledge Object) wrapping
+@sko wrapping_schema
+  modality.kind: "biomem.trace.risk"
+  topic: "neuro.risk-assessment"
+  payload_fields:
+    - trace_id
+    - roh
+    - safety_strength
+    - housing_protection_level
+    - neurorights_attestation
+    - risk_category
+    - risk_severity
+  encryption: required_aes256_gcm
+  signature: required_ed25519
+  timestamp: trace.created_at
+  hash: trace.id
+@end
+
+# ============================================================================
+# SECTION: VERSION HISTORY
+# ============================================================================
+
+@section version_history
+
+@version 1.0.0
+  release_date: 2024-01-15
+  changes:
+    - Initial release
+    - RoH ceilings defined
+    - Safety strength requirements established
+    - Housing-protection levels specified
+    - Neurorights enforcement integrated
+    - Data sovereignty guarantees codified
+  compatibility:
+    - biomem-core: >=1.0.0
+    - biomem-encoder: >=1.0.0
+    - biomem-5d.aln: >=1.0.0
+    - biomem-evolution.aln: >=1.0.0
+@end
+
+@version 1.1.0
+  release_date: planned_Q2_2024
+  changes:
+    - Enhanced per-ROI risk limits
+    - Dynamic safety strength adjustment
+    - Improved neurorights violation detection
+  status: planned
+@end
+
+# ============================================================================
+# END OF SHARD
+# ============================================================================
+
+@end_shard biomem.risk.v1
+
+# Checksum for integrity verification (computed post-generation)
+# @checksum sha256: [AUTO_COMPUTED_ON_BUILD]
+# @signature ed25519: [SIGN_ON_PUBLISH]
