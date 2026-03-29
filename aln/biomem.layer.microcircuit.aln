@@ -1,0 +1,708 @@
+# ============================================================================
+# SHARD: biomem.layer.microcircuit.aln
+# PATH:  aln/biomem.layer.microcircuit.aln
+# VER:   1.0.0
+# LIC:   Data_Lake Sovereign License
+# DESC:  ALN shard specification for microcircuit layer interpretation.
+#        Defines bandpower feature indices, allowed ranges, units, and
+#        derived inequalities for hypothesis validation at microcircuit scale.
+# ============================================================================
+
+@shard biomem.layer.microcircuit.v1
+@version 1.0.0
+@created 2024-01-15T00:00:00Z
+@author Data_Lake Sovereign Research
+@license MIT-Sovereign
+@compatibility biomem-core>=1.0.0, biomem-encoder>=1.0.0, biomem-5d.aln>=1.0.0
+
+# ============================================================================
+# SECTION: LAYER IDENTIFICATION
+# ============================================================================
+
+@section layer_identity
+
+@layer microcircuit
+  index: 2
+  name: "Microcircuit Layer"
+  description: Local neuronal ensembles and graph motifs representing collective dynamics of small neuron groups
+  biological_scale: 10-1000 neurons
+  spatial_resolution: 0.1-1.0 mm
+  temporal_resolution: 1-100 ms
+  primary_data_sources:
+    - EEG_bandpower
+    - LFP_local_field_potential
+    - calcium_imaging
+    - multi_electrode_array
+  state_vector_name: microcircuit
+  min_dimensions: 2
+  max_dimensions: 256
+  default_dimensions: 2
+@end
+
+# ============================================================================
+# SECTION: FEATURE VECTOR SPECIFICATION
+# ============================================================================
+
+@section feature_vector
+
+# Feature index 0: Theta Bandpower (4-8 Hz)
+@feature bandpower_theta
+  index: 0
+  type: f32
+  unit: normalized_power
+  range: [0.0, 1.0]
+  frequency_band: [4.0, 8.0]
+  frequency_unit: Hz
+  description: Theta oscillation power associated with memory encoding and spatial navigation
+  biological_significance:
+    - hippocampal_encoding
+    - working_memory
+    - spatial_navigation
+    - REM_sleep
+  validation:
+    - not_nan: true
+    - not_infinite: true
+    - range_check: [0.0, 1.0]
+  normalization:
+    method: min_max_scaling
+    reference_baseline: resting_state_5min
+    update_frequency: per_session
+  quality_metrics:
+    - signal_to_noise_ratio: >= 3.0
+    - artifact_rejection: required
+    - channel_consistency: required
+@end
+
+# Feature index 1: Alpha Bandpower (8-13 Hz)
+@feature bandpower_alpha
+  index: 1
+  type: f32
+  unit: normalized_power
+  range: [0.0, 1.0]
+  frequency_band: [8.0, 13.0]
+  frequency_unit: Hz
+  description: Alpha oscillation power associated with relaxed wakefulness and attention modulation
+  biological_significance:
+    - relaxed_wakefulness
+    - attention_modulation
+    - sensory_gating
+    - working_memory_maintenance
+  validation:
+    - not_nan: true
+    - not_infinite: true
+    - range_check: [0.0, 1.0]
+  normalization:
+    method: min_max_scaling
+    reference_baseline: resting_state_5min
+    update_frequency: per_session
+  quality_metrics:
+    - signal_to_noise_ratio: >= 3.0
+    - artifact_rejection: required
+    - channel_consistency: required
+@end
+
+# Feature index 2: Beta Bandpower (13-30 Hz) - Optional Extension
+@feature bandpower_beta
+  index: 2
+  type: f32
+  unit: normalized_power
+  range: [0.0, 1.0]
+  frequency_band: [13.0, 30.0]
+  frequency_unit: Hz
+  description: Beta oscillation power associated with active thinking and motor control
+  biological_significance:
+    - active_thinking
+    - motor_control
+    - focused_attention
+    - problem_solving
+  status: optional
+  validation:
+    - not_nan: true
+    - not_infinite: true
+    - range_check: [0.0, 1.0]
+  normalization:
+    method: min_max_scaling
+    reference_baseline: resting_state_5min
+    update_frequency: per_session
+@end
+
+# Feature index 3: Gamma Bandpower (30-100 Hz) - Optional Extension
+@feature bandpower_gamma
+  index: 3
+  type: f32
+  unit: normalized_power
+  range: [0.0, 1.0]
+  frequency_band: [30.0, 100.0]
+  frequency_unit: Hz
+  description: Gamma oscillation power associated with conscious perception and cognitive binding
+  biological_significance:
+    - conscious_perception
+    - cognitive_binding
+    - memory_retrieval
+    - sensory_integration
+  status: optional
+  validation:
+    - not_nan: true
+    - not_infinite: true
+    - range_check: [0.0, 1.0]
+  normalization:
+    method: min_max_scaling
+    reference_baseline: resting_state_5min
+    update_frequency: per_session
+@end
+
+# Feature index 4: Theta/Alpha Ratio
+@feature theta_alpha_ratio
+  index: 4
+  type: f32
+  unit: ratio
+  range: [0.0, 10.0]
+  formula: bandpower_theta / max(bandpower_alpha, 0.001)
+  description: Ratio of theta to alpha power indicating memory load vs. relaxation balance
+  biological_significance:
+    - memory_load_indicator
+    - cognitive_effort
+    - attention_state
+  validation:
+    - not_nan: true
+    - not_infinite: true
+    - range_check: [0.0, 10.0]
+  status: derived
+@end
+
+# Feature index 5: Spectral Entropy
+@feature spectral_entropy
+  index: 5
+  type: f32
+  unit: bits
+  range: [0.0, 4.0]
+  formula: -sum(p_i * log2(p_i)) for all frequency bins
+  description: Measure of spectral complexity indicating brain state diversity
+  biological_significance:
+    - brain_state_diversity
+    - consciousness_level
+    - cognitive_flexibility
+  validation:
+    - not_nan: true
+    - not_infinite: true
+    - range_check: [0.0, 4.0]
+  status: derived
+@end
+
+# ============================================================================
+# SECTION: DERIVED INEQUALITIES FOR HYPOTHESES
+# ============================================================================
+
+@section derived_inequalities
+
+# Inequality H1: Memory encoding requires elevated theta
+@inequality H1_theta_encoding
+  hypothesis_id: H1_molecular_resource_increase
+  formula: bandpower_theta[t] > bandpower_theta[t-1] + 0.05
+  time_window: 1000ms
+  description: Theta power should increase during memory encoding events
+  validation_threshold: 0.70
+  evidence_required:
+    - behavioral_memory_task
+    - concurrent_EEG_recording
+    - stimulus_timing_markers
+  status: testable
+@end
+
+# Inequality H2: Alpha suppression during attention
+@inequality H2_alpha_suppression
+  hypothesis_id: H2_attention_alpha_modulation
+  formula: bandpower_alpha[attention_state] < bandpower_alpha[rest_state] - 0.10
+  time_window: 500ms
+  description: Alpha power should decrease during focused attention compared to rest
+  validation_threshold: 0.75
+  evidence_required:
+    - attention_task_paradigm
+    - baseline_rest_recording
+    - performance_metrics
+  status: testable
+@end
+
+# Inequality H3: Theta-alpha balance for working memory
+@inequality H3_theta_alpha_balance
+  hypothesis_id: H3_working_memory_balance
+  formula: 0.3 <= theta_alpha_ratio <= 2.0
+  time_window: 2000ms
+  description: Optimal working memory performance occurs within theta-alpha balance range
+  validation_threshold: 0.65
+  evidence_required:
+    - working_memory_task
+    - performance_accuracy
+    - reaction_time_metrics
+  status: testable
+@end
+
+# Inequality H4: Gamma increase during memory retrieval
+@inequality H4_gamma_retrieval
+  hypothesis_id: H4_gamma_memory_retrieval
+  formula: bandpower_gamma[retrieval] > bandpower_gamma[baseline] + 0.15
+  time_window: 500ms
+  description: Gamma power should increase during successful memory retrieval
+  validation_threshold: 0.60
+  evidence_required:
+    - memory_retrieval_task
+    - success_failure_classification
+    - timing_precision_ms
+  status: testable
+@end
+
+# Inequality H5: Spectral entropy correlates with cognitive flexibility
+@inequality H5_entropy_flexibility
+  hypothesis_id: H5_entropy_cognitive_flexibility
+  formula: spectral_entropy[high_flexibility] > spectral_entropy[low_flexibility] + 0.5
+  time_window: 5000ms
+  description: Higher spectral entropy should correlate with greater cognitive flexibility
+  validation_threshold: 0.55
+  evidence_required:
+    - task_switching_paradigm
+    - flexibility_metrics
+    - baseline_entropy_measurement
+  status: testable
+@end
+
+# ============================================================================
+# SECTION: VALIDATION RULES
+# ============================================================================
+
+@section validation_rules
+
+# Pre-encoding microcircuit feature validation
+@rule microcircuit_pre_encode
+  trigger: before_encode
+  checks:
+    - bandpower_theta in [0.0, 1.0]
+    - bandpower_alpha in [0.0, 1.0]
+    - bandpower_theta not_nan
+    - bandpower_alpha not_nan
+    - min_features_present: 2
+    - max_features_present: 6
+  action: reject_if_fail
+  error_code: MICROCIRCUIT_VALIDATION_FAILED
+@end
+
+# Quality threshold validation
+@rule microcircuit_quality_threshold
+  trigger: on_feature_extract
+  checks:
+    - signal_to_noise_ratio >= 3.0
+    - artifact_rejection_passed: true
+    - channel_consistency_check: passed
+    - baseline_normalization_complete: true
+  action: flag_for_review
+  warning_code: MICROCIRCUIT_QUALITY_LOW
+@end
+
+# Temporal consistency validation
+@rule microcircuit_temporal_consistency
+  trigger: on_trace_update
+  checks:
+    - bandpower_delta_per_second <= 0.5
+    - no_sudden_jumps: true
+    - temporal_smoothing_applied: true
+  action: smooth_and_continue
+  info_code: MICROCIRCUIT_TEMPORAL_ADJUSTED
+@end
+
+# Cross-channel consistency validation
+@rule microcircuit_channel_consistency
+  trigger: on_multi_channel_input
+  checks:
+    - inter_channel_correlation >= 0.3
+    - no_outlier_channels: true
+    - spatial_gradient_smooth: true
+  action: flag_outliers
+  warning_code: MICROCIRCUIT_CHANNEL_INCONSISTENT
+@end
+
+# ============================================================================
+# SECTION: ROI-SPECIFIC PARAMETERS
+# ============================================================================
+
+@section roi_parameters
+
+# Hippocampus-specific microcircuit parameters
+@roi hippocampus
+  atlas_label: "HIPPOCAMPUS"
+  mni_coordinates:
+    x: [15, 35]
+    y: [-35, -10]
+    z: [-10, 10]
+  expected_features:
+    - bandpower_theta: high
+    - bandpower_alpha: moderate
+    - theta_alpha_ratio: elevated
+  baseline_values:
+    bandpower_theta: 0.45
+    bandpower_alpha: 0.35
+    theta_alpha_ratio: 1.29
+  activation_thresholds:
+    bandpower_theta: 0.55
+    theta_alpha_ratio: 1.50
+  functional_associations:
+    - episodic_memory
+    - spatial_navigation
+    - context_encoding
+@end
+
+# Prefrontal Cortex-specific microcircuit parameters
+@roi prefrontal_cortex
+  atlas_label: "PFC"
+  mni_coordinates:
+    x: [-20, 20]
+    y: [40, 70]
+    z: [20, 50]
+  expected_features:
+    - bandpower_theta: moderate
+    - bandpower_alpha: low
+    - bandpower_beta: elevated
+  baseline_values:
+    bandpower_theta: 0.35
+    bandpower_alpha: 0.25
+    bandpower_beta: 0.45
+  activation_thresholds:
+    bandpower_beta: 0.55
+    theta_alpha_ratio: 1.20
+  functional_associations:
+    - executive_function
+    - working_memory
+    - decision_making
+@end
+
+# Motor Cortex-specific microcircuit parameters
+@roi motor_cortex
+  atlas_label: "MOTOR"
+  mni_coordinates:
+    x: [-40, -20]
+    y: [-20, 0]
+    z: [50, 70]
+  expected_features:
+    - bandpower_beta: high
+    - bandpower_gamma: elevated_during_movement
+  baseline_values:
+    bandpower_beta: 0.50
+    bandpower_gamma: 0.30
+  activation_thresholds:
+    bandpower_beta: 0.60
+    bandpower_gamma: 0.45
+  functional_associations:
+    - motor_planning
+    - movement_execution
+    - motor_learning
+@end
+
+# Visual Cortex-specific microcircuit parameters
+@roi visual_cortex
+  atlas_label: "VISUAL"
+  mni_coordinates:
+    x: [-30, 30]
+    y: [-90, -70]
+    z: [0, 20]
+  expected_features:
+    - bandpower_alpha: high_at_rest
+    - bandpower_gamma: elevated_during_stimulus
+  baseline_values:
+    bandpower_alpha: 0.50
+    bandpower_gamma: 0.25
+  activation_thresholds:
+    bandpower_alpha_suppression: 0.30
+    bandpower_gamma: 0.40
+  functional_associations:
+    - visual_processing
+    - object_recognition
+    - visual_attention
+@end
+
+# ============================================================================
+# SECTION: METRICS FOR PROMETHEUS EXPORT
+# ============================================================================
+
+@section metrics_export
+
+# Prometheus metrics for microcircuit layer monitoring
+@metrics prometheus_microcircuit_export
+  biomem_microcircuit_theta_current: gauge(bandpower_theta)
+  biomem_microcircuit_alpha_current: gauge(bandpower_alpha)
+  biomem_microcircuit_beta_current: gauge(bandpower_beta)
+  biomem_microcircuit_gamma_current: gauge(bandpower_gamma)
+  biomem_microcircuit_theta_alpha_ratio: gauge(theta_alpha_ratio)
+  biomem_microcircuit_spectral_entropy: gauge(spectral_entropy)
+  biomem_microcircuit_feature_count: gauge(feature_vector_length)
+  biomem_microcircuit_quality_score: gauge(quality_metric_composite)
+  biomem_microcircuit_snr_current: gauge(signal_to_noise_ratio)
+  biomem_microcircuit_artifact_rate: gauge(artifact_rejection_rate)
+  biomem_microcircuit_hypothesis_h1_status: gauge(H1_theta_encoding_satisfied)
+  biomem_microcircuit_hypothesis_h2_status: gauge(H2_alpha_suppression_satisfied)
+  biomem_microcircuit_hypothesis_h3_status: gauge(H3_theta_alpha_balance_satisfied)
+  biomem_microcircuit_hypothesis_h4_status: gauge(H4_gamma_retrieval_satisfied)
+  biomem_microcircuit_hypothesis_h5_status: gauge(H5_entropy_flexibility_satisfied)
+  biomem_microcircuit_validation_errors_total: counter(validation_error_events)
+  biomem_microcircuit_quality_warnings_total: counter(quality_warning_events)
+@end
+
+# Microcircuit dashboard configuration
+@dashboard microcircuit_dashboard
+  panels:
+    - panel: bandpower_time_series
+      type: time_series
+      metrics:
+        - biomem_microcircuit_theta_current
+        - biomem_microcircuit_alpha_current
+        - biomem_microcircuit_beta_current
+        - biomem_microcircuit_gamma_current
+      time_range: 1h
+      refresh_interval: 5s
+    - panel: theta_alpha_ratio_gauge
+      type: gauge
+      metric: biomem_microcircuit_theta_alpha_ratio
+      thresholds:
+        - low: 0.3
+        - optimal_min: 0.5
+        - optimal_max: 2.0
+        - high: 3.0
+    - panel: spectral_entropy_distribution
+      type: histogram
+      metric: biomem_microcircuit_spectral_entropy
+      bucket_range: [0.0, 4.0]
+      bucket_count: 20
+    - panel: quality_metrics
+      type: stat
+      metrics:
+        - biomem_microcircuit_quality_score
+        - biomem_microcircuit_snr_current
+        - biomem_microcircuit_artifact_rate
+    - panel: hypothesis_status_matrix
+      type: table
+      metrics:
+        - biomem_microcircuit_hypothesis_h1_status
+        - biomem_microcircuit_hypothesis_h2_status
+        - biomem_microcircuit_hypothesis_h3_status
+        - biomem_microcircuit_hypothesis_h4_status
+        - biomem_microcircuit_hypothesis_h5_status
+      columns: [hypothesis_id, status, threshold, current_value, last_updated]
+    - panel: roi_activation_heatmap
+      type: heatmap
+      metrics: [bandpower_by_roi]
+      roi_list: [hippocampus, prefrontal_cortex, motor_cortex, visual_cortex]
+  end
+@end
+
+# ============================================================================
+# SECTION: EXTERNAL SYSTEM INTEGRATION
+# ============================================================================
+
+@section external_integration
+
+# EEG/BCI hardware integration specifications
+@hardware eeg_integration
+  supported_devices:
+    - device: OpenBCI_Cyton
+      channels: 8
+      sample_rate: [250, 500, 1000]
+      resolution_bits: 24
+      compatibility: full
+    - device: OpenBCI_Ganglion
+      channels: 4
+      sample_rate: [200, 400]
+      resolution_bits: 24
+      compatibility: full
+    - device: NeuroSky_MindWave
+      channels: 1
+      sample_rate: 512
+      resolution_bits: 12
+      compatibility: limited
+    - device: Emotiv_EPOC
+      channels: 14
+      sample_rate: 128
+      resolution_bits: 14
+      compatibility: full
+    - device: g_tec_gNautilus
+      channels: [8, 16, 32, 64]
+      sample_rate: [250, 500, 1000, 2000]
+      resolution_bits: 24
+      compatibility: full
+  preprocessing_requirements:
+    - notch_filter: 50Hz_or_60Hz
+    - bandpass_filter: [1.0, 100.0]
+    - artifact_rejection: ICA_or_threshold
+    - reference: common_average_or_mastoid
+  data_format:
+    - input: LSL_or_binary
+    - output: JSON_with_timestamps
+@end
+
+# Reality.os visualization hooks for microcircuit layer
+@visualization reality_os_microcircuit
+  render_modes:
+    - mode: frequency_spectrum_3d
+      description: 3D frequency spectrum visualization over cortical surface
+      update_rate: 10Hz
+    - mode: bandpower_heatmap
+      description: Real-time bandpower heatmap on brain atlas
+      update_rate: 5Hz
+    - mode: hypothesis_overlay
+      description: Visual overlay of hypothesis satisfaction on ROI
+      update_rate: 1Hz
+    - mode: temporal_evolution
+      description: Time-lapse visualization of microcircuit state changes
+      update_rate: 1Hz
+  interaction_modes:
+    - inspect_roi
+    - compare_bands
+    - view_hypothesis_status
+    - export_time_window
+  color_schemes:
+    - theta: blue_gradient
+    - alpha: green_gradient
+    - beta: yellow_gradient
+    - gamma: red_gradient
+@end
+
+# ALN-Blockchain smart contract hooks for microcircuit validation
+@blockchain microcircuit_smart_contracts
+  on_feature_extract:
+    - validate_feature_ranges
+    - compute_quality_metrics
+    - record_feature_hash
+    - emit_extraction_event
+  on_hypothesis_test:
+    - evaluate_inequality
+    - record_satisfaction_status
+    - update_evidence_registry
+    - emit_hypothesis_event
+  on_trace_encode:
+    - verify_microcircuit_dimensions
+    - validate_bandpower_normalization
+    - record_layer_contribution
+    - emit_encode_event
+  on_quality_violation:
+    - flag_trace_for_review
+    - notify_curatorial_board
+    - quarantine_if_critical
+    - emit_violation_event
+  end
+@end
+
+# SKO (Sovereign Knowledge Object) wrapping for microcircuit data
+@sko microcircuit_wrapping
+  modality.kind: "biomem.trace.microcircuit"
+  topic: "neuro.microcircuit-layer"
+  payload_fields:
+    - bandpower_theta
+    - bandpower_alpha
+    - bandpower_beta
+    - bandpower_gamma
+    - theta_alpha_ratio
+    - spectral_entropy
+    - quality_metrics
+    - roi_label
+    - timestamp
+  compression: optional_gzip
+  encryption: required_aes256_gcm
+  signature: required_ed25519
+  timestamp: trace.created_at
+  hash: trace.id
+@end
+
+# ============================================================================
+# SECTION: COMPLIANCE CERTIFICATION
+# ============================================================================
+
+@section compliance
+
+@certification microcircuit_feature_validation
+  description: All microcircuit features must pass range and quality validation
+  enforcement_mechanism: encoder_validation + ALN_shard_check
+  violation_consequences:
+    - feature_rejected
+    - trace_flagged
+    - quality_warning_emitted
+  audit_frequency: per_trace
+@end
+
+@certification hypothesis_testability
+  description: All hypotheses must be testable with available data
+  enforcement_mechanism: inequality_validation + evidence_requirement
+  violation_consequences:
+    - hypothesis_flagged
+    - evidence_request_issued
+    - curatorial_review_triggered
+  audit_frequency: per_hypothesis
+@end
+
+@certification roi_specificity
+  description: ROI-specific parameters must be respected for region-tagged traces
+  enforcement_mechanism: atlas_coordinate_validation + parameter_check
+  violation_consequences:
+    - roi_mismatch_warning
+    - parameter_adjustment_suggested
+    - curator_notification
+  audit_frequency: per_trace
+@end
+
+@certification quality_threshold_maintenance
+  description: Signal quality thresholds must be maintained for valid microcircuit data
+  enforcement_mechanism: SNR_monitoring + artifact_detection
+  violation_consequences:
+    - quality_warning
+    - data_flagged_for_review
+    - potential_trace_rejection
+  audit_frequency: continuous
+@end
+
+# ============================================================================
+# SECTION: VERSION HISTORY
+# ============================================================================
+
+@section version_history
+
+@version 1.0.0
+  release_date: 2024-01-15
+  changes:
+    - Initial release
+    - Core bandpower features defined (theta, alpha)
+    - Optional features specified (beta, gamma)
+    - Derived features included (ratio, entropy)
+    - Five testable hypotheses codified
+    - ROI-specific parameters established
+    - Prometheus metrics integration added
+    - Reality.os visualization hooks defined
+  compatibility:
+    - biomem-core: >=1.0.0
+    - biomem-encoder: >=1.0.0
+    - biomem-5d.aln: >=1.0.0
+@end
+
+@version 1.1.0
+  release_date: planned_Q2_2024
+  changes:
+    - Additional frequency bands (delta, high-gamma)
+    - Enhanced artifact detection algorithms
+    - Cross-frequency coupling metrics
+    - Machine learning feature embeddings
+  status: planned
+@end
+
+@version 2.0.0
+  release_date: planned_Q4_2024
+  changes:
+    - Single-neuron resolution support
+    - Spike-train integration
+    - Synaptic plasticity proxies
+    - Molecular layer coupling
+  status: roadmap
+@end
+
+# ============================================================================
+# END OF SHARD
+# ============================================================================
+
+@end_shard biomem.layer.microcircuit.v1
+
+# Checksum for integrity verification (computed post-generation)
+# @checksum sha256: [AUTO_COMPUTED_ON_BUILD]
+# @signature ed25519: [SIGN_ON_PUBLISH]
