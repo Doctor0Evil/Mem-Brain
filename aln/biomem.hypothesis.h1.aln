@@ -1,0 +1,970 @@
+# ============================================================================
+# SHARD: biomem.hypothesis.h1.aln
+# PATH:  aln/biomem.hypothesis.h1.aln
+# VER:   1.0.0
+# LIC:   Data_Lake Sovereign License
+# DESC:  ALN shard specification for Hypothesis H1: Molecular resource
+#        increase during hippocampal memory consolidation. Defines testable
+#        inequalities, evidence requirements, PoF evaluation, and trace
+#        integration for validation pipeline.
+# ============================================================================
+
+@shard biomem.hypothesis.h1.v1
+@version 1.0.0
+@created 2024-01-15T00:00:00Z
+@author Data_Lake Sovereign Research
+@license MIT-Sovereign
+@compatibility biomem-core>=1.0.0, biomem-encoder>=1.0.0, biomem-5d.aln>=1.0.0, biomem-evolution.aln>=1.0.0, biomem.layer.microcircuit.aln>=1.0.0
+
+# ============================================================================
+# SECTION: HYPOTHESIS IDENTIFICATION
+# ============================================================================
+
+@section hypothesis_identity
+
+@hypothesis H1_molecular_resource_increase
+  id: "H1"
+  title: "Molecular Resource Increase During Hippocampal Consolidation"
+  version: 1.0.0
+  status: testable
+  priority: high
+  created: 2024-01-15T00:00:00Z
+  last_updated: 2024-01-15T00:00:00Z
+  
+  description: |
+    Memory consolidation requires increased molecular resources in the
+    hippocampus over time. This hypothesis posits that successful long-term
+    memory formation is accompanied by measurable increases in molecular
+    layer activity markers within the hippocampal formation during the
+    consolidation window (minutes to hours post-encoding).
+  
+  short_description: "Consolidation requires increased molecular resources in hippocampus"
+  
+  biological_basis:
+    - long_term_potentiation
+    - protein_synthesis_dependent_consolidation
+    - synaptic_tagging_and_capture
+    - immediate_early_gene_expression
+    - epigenetic_modification
+  
+  predicted_outcome: |
+    R^{(molecular)}_{hippocampus, t+consolidation} - R^{(molecular)}_{hippocampus, t+encoding} >= 0
+  
+  falsification_criteria: |
+    If molecular resources decrease or remain static during successful
+    consolidation, hypothesis is falsified.
+  
+  related_hypotheses:
+    - H2_attention_alpha_modulation
+    - H3_working_memory_balance
+    - H4_gamma_memory_retrieval
+  end
+  
+  layers_involved:
+    - molecular
+    - synaptic
+    - microcircuit
+  end
+  
+  primary_layer: molecular
+@end
+
+# ============================================================================
+# SECTION: MATHEMATICAL FORMULATION
+# ============================================================================
+
+@section mathematical_formulation
+
+# Primary inequality for H1 validation
+@inequality H1_primary
+  name: "Molecular Resource Monotonicity"
+  formula: "R^{(1)}_{hipp,t+Δt} - R^{(1)}_{hipp,t} >= 0"
+  expanded_form: |
+    Let R^{(1)}_{hipp,t} = molecular resource metric at time t in hippocampus
+    Let Δt = consolidation window (300s to 3600s)
+    Then: R^{(1)}_{hipp,t+Δt} >= R^{(1)}_{hipp,t}
+  
+  variables:
+    - name: R^{(1)}_{hipp,t}
+      type: f32
+      description: Molecular resource metric in hippocampus at time t
+      range: [0.0, 1.0]
+      unit: normalized_resource_density
+    - name: Δt
+      type: f32
+      description: Consolidation time window
+      range: [300.0, 3600.0]
+      unit: seconds
+    - name: t
+      type: f64
+      description: Encoding timestamp (Unix epoch)
+      range: [0.0, 4102444800.0]
+      unit: seconds
+  end
+  
+  threshold: 0.0
+  operator: ">="
+  direction: non_decreasing
+  confidence_required: 0.70
+@end
+
+# Secondary inequality: Resource rate of change
+@inequality H1_rate
+  name: "Molecular Resource Rate of Change"
+  formula: "dR^{(1)}_{hipp}/dt >= k_{min}"
+  expanded_form: |
+    The rate of molecular resource increase must exceed minimum threshold
+    during consolidation window.
+  
+  variables:
+    - name: dR^{(1)}_{hipp}/dt
+      type: f32
+      description: Rate of molecular resource change
+      range: [0.0, 0.01]
+      unit: normalized_resource_per_second
+    - name: k_{min}
+      type: f32
+      description: Minimum rate threshold
+      value: 0.0001
+      unit: normalized_resource_per_second
+  end
+  
+  threshold: 0.0001
+  operator: ">="
+  direction: positive_rate
+  confidence_required: 0.65
+@end
+
+# Tertiary inequality: Resource-Performance Correlation
+@inequality H1_correlation
+  name: "Resource-Performance Correlation"
+  formula: "corr(R^{(1)}_{hipp,Δt}, MemoryPerformance) >= ρ_{min}"
+  expanded_form: |
+    The increase in molecular resources should positively correlate with
+    subsequent memory performance metrics.
+  
+  variables:
+    - name: corr
+      type: f32
+      description: Pearson correlation coefficient
+      range: [-1.0, 1.0]
+    - name: ρ_{min}
+      type: f32
+      description: Minimum correlation threshold
+      value: 0.30
+  end
+  
+  threshold: 0.30
+  operator: ">="
+  direction: positive_correlation
+  confidence_required: 0.75
+@end
+
+# ============================================================================
+# SECTION: COORDINATE AND LAYER SPECIFICATIONS
+# ============================================================================
+
+@section coordinate_layer_specs
+
+# Spatial coordinate specification for hippocampus
+@coordinate hippocampal_roi
+  atlas: MNI152
+  roi_label: "hippocampus"
+  subregions:
+    - CA1
+    - CA2
+    - CA3
+    - dentate_gyrus
+    - subiculum
+  end
+  
+  mni_bounds:
+    x: [15.0, 35.0]
+    y: [-35.0, -10.0]
+    z: [-10.0, 10.0]
+  end
+  
+  hemisphere: bilateral
+  volume_mm3: 6500
+  voxel_resolution_mm: 1.0
+@end
+
+# Temporal window specification
+@temporal consolidation_window
+  name: "Memory Consolidation Window"
+  t_start: 0
+  t_end: 3600
+  unit: seconds
+  phases:
+    - name: early_consolidation
+      t_start: 0
+      t_end: 300
+      description: "Immediate post-encoding phase (0-5 min)"
+    - name: intermediate_consolidation
+      t_start: 300
+      t_end: 1800
+      description: "Intermediate phase (5-30 min)"
+    - name: late_consolidation
+      t_start: 1800
+      t_end: 3600
+      description: "Late phase (30-60 min)"
+  end
+  
+  measurement_points:
+    - t_relative: 0
+      name: encoding_baseline
+    - t_relative: 300
+      name: early_post
+    - t_relative: 1800
+      name: intermediate_post
+    - t_relative: 3600
+      name: late_post
+  end
+@end
+
+# Layer specification for H1
+@layer molecular_h1
+  index: 0
+  name: "Molecular Layer (H1)"
+  state_vector: molecular
+  required_dimensions: 4
+  feature_mapping:
+    - index: 0
+      name: protein_synthesis_proxy
+      description: Proxy measure for protein synthesis activity
+      range: [0.0, 1.0]
+    - index: 1
+      name: ieg_expression_proxy
+      description: Immediate early gene expression proxy
+      range: [0.0, 1.0]
+    - index: 2
+      name: epigenetic_modification_proxy
+      description: Epigenetic modification marker proxy
+      range: [0.0, 1.0]
+    - index: 3
+      name: receptor_trafficking_proxy
+      description: Receptor trafficking activity proxy
+      range: [0.0, 1.0]
+  end
+  
+  composite_metric:
+    name: R^{(1)}_{hipp}
+    formula: "mean(protein_synthesis_proxy, ieg_expression_proxy, epigenetic_modification_proxy, receptor_trafficking_proxy)"
+    range: [0.0, 1.0]
+  end
+@end
+
+# ============================================================================
+# SECTION: EVIDENCE REQUIREMENTS
+# ============================================================================
+
+@section evidence_requirements
+
+# Primary evidence type: Imaging data
+@evidence imaging_data
+  type: neuroimaging
+  modalities:
+    - modality: two_photon_calcium_imaging
+      required: true
+      resolution:
+        spatial: 1.0
+        temporal: 100
+        unit_spatial: μm
+        unit_temporal: ms
+      description: "Direct observation of molecular activity via calcium indicators"
+    - modality: fmri_bold
+      required: false
+      resolution:
+        spatial: 2.0
+        temporal: 2000
+        unit_spatial: mm
+        unit_temporal: ms
+      description: "Indirect hemodynamic correlate of molecular activity"
+    - modality: pet_tracer
+      required: false
+      tracer: protein_synthesis_marker
+      description: "Direct molecular tracer for protein synthesis"
+  end
+  
+  quality_requirements:
+    - snr_minimum: 5.0
+    - motion_artifact_threshold: 0.5
+    - coverage_requirement: full_hippocampus
+  end
+  
+  preprocessing_required:
+    - motion_correction
+    - spatial_normalization
+    - temporal_filtering
+    - baseline_normalization
+  end
+@end
+
+# Secondary evidence type: Behavioral performance
+@evidence behavioral_data
+  type: behavioral
+  tasks:
+    - task: episodic_memory_recall
+      required: true
+      metrics:
+        - accuracy
+        - reaction_time
+        - confidence_rating
+      description: "Measure memory performance post-consolidation"
+    - task: spatial_navigation
+      required: false
+      metrics:
+        - path_efficiency
+        - landmark_recall
+      description: "Hippocampal-dependent spatial memory task"
+  end
+  
+  timing_requirements:
+    - encoding_session: true
+    - retention_interval: 3600
+    - retrieval_session: true
+    unit_seconds: true
+  end
+  
+  performance_threshold:
+    minimum_accuracy: 0.60
+    above_chance: true
+  end
+@end
+
+# Tertiary evidence type: Physiological markers
+@evidence physiological_data
+  type: physiological
+  markers:
+    - marker: hrv
+      required: true
+      description: "Heart rate variability as arousal/stress indicator"
+      range: [0.0, 100.0]
+    - marker: eeg_theta_power
+      required: true
+      description: "Hippocampal theta oscillation proxy"
+      range: [0.0, 1.0]
+    - marker: pupil_dilation
+      required: false
+      description: "Arousal and cognitive effort indicator"
+      range: [0.0, 10.0]
+      unit: mm
+  end
+  
+  synchronization_requirements:
+    - timestamp_precision: 10
+    - unit: ms
+    - clock_sync_protocol: NTP_or_PTP
+  end
+@end
+
+# Evidence hash for PoF verification
+@evidence evidence_hash
+  type: cryptographic
+  algorithm: sha256
+  fields_to_hash:
+    - imaging_data.file_paths
+    - behavioral_data.performance_metrics
+    - physiological_data.timestamps
+    - hypothesis_id
+    - participant_id_anonymized
+    - session_timestamp
+  end
+  
+  hash_storage:
+    - location: trace.state_hex
+    - location: aln_shard_metadata
+    - location: blockchain_commitment_optional
+  end
+  
+  verification_process:
+    - compute_hash_on_submit
+    - verify_hash_on_retrieval
+    - flag_mismatch_for_review
+  end
+@end
+
+# ============================================================================
+# SECTION: POF/NFA EVALUATION
+# ============================================================================
+
+@section pof_nfa_evaluation
+
+# PoF validation requirements for H1
+@pof h1_pof_requirements
+  minimum_evidence_types: 2
+  required_evidence_types:
+    - imaging_data
+    - behavioral_data
+  end
+  
+  statistical_requirements:
+    - test_type: paired_t_test
+      comparison: "R^{(1)}_{t+Δt} vs R^{(1)}_{t}"
+      significance_threshold: 0.05
+      direction: one_tailed_greater
+    - effect_size_minimum: 0.30
+      metric: cohens_d
+    - power_minimum: 0.80
+    - sample_size_minimum: 20
+  end
+  
+  validation_criteria:
+    - inequality_satisfied: true
+    - statistical_significance: true
+    - effect_size_adequate: true
+    - evidence_quality_high: true
+  end
+  
+  pass_threshold: 0.70
+  evidence_weight:
+    imaging_data: 0.40
+    behavioral_data: 0.40
+    physiological_data: 0.20
+  end
+@end
+
+# NFA custom-fit allowance for H1
+@nfa h1_nfa_allowance
+  custom_implementation_allowed: true
+  conditions:
+    - all_inequalities_must_be_testable
+    - all_evidence_requirements_must_be_met
+    - statistical_standards_must_be_equivalent_or_better
+    - documentation_must_be_complete
+  end
+  
+  approval_process:
+    - submit_custom_implementation_shard
+    - curatorial_board_review
+    - minimum_reviewers: 3
+    - approval_threshold: 0.67
+    - review_period_days: 14
+  end
+  
+  documentation_requirements:
+    - mathematical_formulation
+    - evidence_collection_protocol
+    - statistical_analysis_plan
+    - validation_results
+    - comparison_to_standard_implementation
+  end
+  
+  equivalence_criteria:
+    - sensitivity >= standard_implementation
+    - specificity >= standard_implementation
+    - reproducibility >= standard_implementation
+  end
+@end
+
+# PoF evidence submission schema
+@schema pof_evidence_submission
+  fields:
+    - name: hypothesis_id
+      type: string
+      required: true
+      format: "H[0-9]+"
+    - name: participant_id
+      type: string
+      required: true
+      format: uuid
+      anonymized: true
+    - name: session_timestamp
+      type: f64
+      required: true
+      format: unix_epoch
+    - name: imaging_data_hash
+      type: string
+      required: true
+      format: sha256_hex
+    - name: behavioral_metrics
+      type: object
+      required: true
+      fields:
+        - accuracy: f32
+        - reaction_time_ms: f32
+        - confidence: f32
+    - name: molecular_resource_t0
+      type: f32
+      required: true
+      range: [0.0, 1.0]
+    - name: molecular_resource_t1
+      type: f32
+      required: true
+      range: [0.0, 1.0]
+    - name: inequality_satisfied
+      type: bool
+      required: true
+    - name: statistical_p_value
+      type: f32
+      required: true
+      range: [0.0, 1.0]
+    - name: effect_size
+      type: f32
+      required: true
+    - name: evidence_hash
+      type: string
+      required: true
+      format: sha256_hex
+  end
+  
+  validation:
+    - all_required_fields_present
+    - all_field_types_valid
+    - all_ranges_satisfied
+    - evidence_hash_verifiable
+  end
+@end
+
+# ============================================================================
+# SECTION: RISK AND SAFETY PARAMETERS
+# ============================================================================
+
+@section risk_safety_parameters
+
+# RoH constraints for H1 experiments
+@risk h1_roh_constraints
+  roh_max: 0.30
+  roh_ceiling_rationale: "Non-invasive measurements only; no intervention"
+  
+  risk_factors:
+    - factor: data_privacy
+      level: moderate
+      mitigation: encryption_and_anonymization
+    - factor: psychological_discomfort
+      level: low
+      mitigation: participant_consent_and_debriefing
+    - factor: data_misuse
+      level: moderate
+      mitigation: access_control_and_audit
+  end
+  
+  safety_requirements:
+    - informed_consent: required
+    - data_anonymization: required
+    - secure_storage: required
+    - access_logging: required
+  end
+@end
+
+# Safety strength requirements for H1 traces
+@safety h1_safety_requirements
+  minimum_safety_strength: 0.75
+  safety_factors:
+    - factor: data_encryption
+      weight: 0.30
+    - factor: access_control
+      weight: 0.25
+    - factor: audit_trail
+      weight: 0.20
+    - factor: consent_verification
+      weight: 0.25
+  end
+  
+  safety_calculation:
+    formula: "sum(factor_weight * factor_compliance_score)"
+    minimum_compliance_score: 0.75
+  end
+  
+  export_requirements:
+    - safety_strength >= 0.75: local_export_allowed
+    - safety_strength >= 0.85: remote_export_allowed
+    - safety_strength >= 0.90: third_party_share_allowed
+    - safety_strength >= 0.95: public_release_allowed
+  end
+@end
+
+# Knowledge factor requirements for H1 PoF
+@knowledge h1_knowledge_requirements
+  minimum_knowledge_factor: 0.50
+  knowledge_components:
+    - component: theoretical_understanding
+      weight: 0.25
+      assessment: literature_review_completeness
+    - component: methodological_rigor
+      weight: 0.30
+      assessment: protocol_adherence_score
+    - component: statistical_competence
+      weight: 0.25
+      assessment: analysis_quality_score
+    - component: interpretation_validity
+      weight: 0.20
+      assessment: conclusion_support_score
+  end
+  
+  knowledge_calculation:
+    formula: "sum(component_weight * component_score)"
+    minimum_component_score: 0.50
+  end
+  
+  poF_threshold: 0.70
+@end
+
+# ============================================================================
+# SECTION: MEMORYTRACE INTEGRATION
+# ============================================================================
+
+@section memorytrace_integration
+
+# Mapping H1 evidence to MemoryTrace structure
+@mapping h1_to_memorytrace
+  trace_fields:
+    - field: trace.id
+      source: evidence_hash
+      transformation: sha256_truncate_16
+    - field: trace.coord.space
+      source: hippocampal_roi.mni_coordinates
+      transformation: centroid_extraction
+    - field: trace.coord.time
+      source: session_timestamp
+      transformation: unix_epoch_passthrough
+    - field: trace.coord.state.molecular
+      source: molecular_resource_vector
+      transformation: normalize_and_concatenate
+    - field: trace.roh
+      source: h1_roh_constraints.roh_max
+      transformation: passthrough
+    - field: trace.knowledge_factor
+      source: h1_knowledge_requirements.knowledge_calculation
+      transformation: passthrough
+    - field: trace.safety_strength
+      source: h1_safety_requirements.safety_calculation
+      transformation: passthrough
+  end
+  
+  validation_rules:
+    - all_trace_fields_populated
+    - all_validations_pass
+    - aln_shard_compliance_verified
+  end
+@end
+
+# H1-specific trace metadata
+@metadata h1_trace_metadata
+  required_fields:
+    - hypothesis_id: "H1"
+    - hypothesis_version: "1.0.0"
+    - evidence_collection_protocol: string
+    - statistical_analysis_plan: string
+    - curatorial_review_status: enum[pending, approved, rejected]
+    - pof_evidence_hash: sha256_hex
+  end
+  
+  optional_fields:
+    - notes: string
+    - deviations_from_protocol: array[string]
+    - additional_evidence_links: array[url]
+  end
+  
+  indexing:
+    - by: hypothesis_id
+    - by: session_timestamp
+    - by: participant_id_anonymized
+    - by: pof_status
+  end
+@end
+
+# H1 trace lifecycle states
+@lifecycle h1_trace_lifecycle
+  states:
+    - state: created
+      description: "Trace initially encoded from evidence"
+      transitions: [validated, rejected]
+    - state: validated
+      description: "Trace passed all validation checks"
+      transitions: [under_review, published]
+    - state: under_review
+      description: "Trace awaiting curatorial review"
+      transitions: [approved, rejected]
+    - state: approved
+      description: "Trace approved as PoF evidence"
+      transitions: [published, archived]
+    - state: rejected
+      description: "Trace failed validation or review"
+      transitions: [resubmitted, archived]
+    - state: published
+      description: "Trace published as validated evidence"
+      transitions: [archived]
+    - state: archived
+      description: "Trace archived (final state)"
+      transitions: []
+  end
+  
+  state_metadata:
+    - state_transitions_logged: true
+    - transition_timestamps_recorded: true
+    - transition_reasons_documented: true
+  end
+@end
+
+# ============================================================================
+# SECTION: PROMETHEUS METRICS
+# ============================================================================
+
+@section prometheus_metrics
+
+# Prometheus metrics for H1 hypothesis tracking
+@metrics prometheus_h1_export
+  biomem_h1_evidence_submissions_total: counter(h1_evidence_submissions)
+  biomem_h1_evidence_approved_total: counter(h1_evidence_approvals)
+  biomem_h1_evidence_rejected_total: counter(h1_evidence_rejections)
+  biomem_h1_inequality_satisfied: gauge(inequality_H1_primary_satisfied)
+  biomem_h1_inequality_rate_satisfied: gauge(inequality_H1_rate_satisfied)
+  biomem_h1_inequality_correlation_satisfied: gauge(inequality_H1_correlation_satisfied)
+  biomem_h1_molecular_resource_t0: gauge(R_hipp_t0)
+  biomem_h1_molecular_resource_t1: gauge(R_hipp_t1)
+  biomem_h1_molecular_resource_delta: gauge(R_hipp_t1 - R_hipp_t0)
+  biomem_h1_statistical_p_value: gauge(p_value_from_test)
+  biomem_h1_effect_size: gauge(cohens_d)
+  biomem_h1_pof_score: gauge(pof_composite_score)
+  biomem_h1_knowledge_factor: gauge(knowledge_factor_computed)
+  biomem_h1_safety_strength: gauge(safety_strength_computed)
+  biomem_h1_roh_current: gauge(risk_of_harm_current)
+  biomem_h1_curatorial_review_pending: gauge(pending_reviews_count)
+  biomem_h1_curatorial_review_approved: gauge(approved_reviews_count)
+  biomem_h1_curatorial_review_rejected: gauge(rejected_reviews_count)
+  biomem_h1_evidence_quality_score: gauge(evidence_quality_composite)
+  biomem_h1_reproducibility_score: gauge(reproducibility_metric)
+@end
+
+# H1 hypothesis dashboard configuration
+@dashboard h1_dashboard
+  panels:
+    - panel: molecular_resource_timecourse
+      type: time_series
+      metrics:
+        - biomem_h1_molecular_resource_t0
+        - biomem_h1_molecular_resource_t1
+      time_range: per_session
+      description: "Molecular resource change from encoding to consolidation"
+    
+    - panel: inequality_satisfaction_status
+      type: stat
+      metrics:
+        - biomem_h1_inequality_satisfied
+        - biomem_h1_inequality_rate_satisfied
+        - biomem_h1_inequality_correlation_satisfied
+      thresholds:
+        - satisfied: 1
+        - not_satisfied: 0
+    
+    - panel: pof_score_distribution
+      type: histogram
+      metric: biomem_h1_pof_score
+      bucket_range: [0.0, 1.0]
+      bucket_count: 20
+    
+    - panel: evidence_submission_funnel
+      type: funnel
+      stages:
+        - submitted: biomem_h1_evidence_submissions_total
+        - validated: biomem_h1_evidence_approved_total
+        - published: biomem_h1_evidence_approved_total
+    
+    - panel: curatorial_review_queue
+      type: table
+      metric: biomem_h1_curatorial_review_pending
+      columns: [trace_id, submitted_at, pof_score, reviewer_assigned]
+    
+    - panel: statistical_metrics
+      type: stat
+      metrics:
+        - biomem_h1_statistical_p_value
+        - biomem_h1_effect_size
+      thresholds:
+        - p_significant: 0.05
+        - effect_medium: 0.30
+        - effect_large: 0.50
+  end
+@end
+
+# ============================================================================
+# SECTION: EXTERNAL SYSTEM INTEGRATION
+# ============================================================================
+
+@section external_integration
+
+# ALN-Blockchain smart contract hooks for H1
+@blockchain h1_smart_contracts
+  on_evidence_submit:
+    - validate_evidence_hash
+    - verify_pof_requirements
+    - record_submission_event
+    - emit_evidence_received
+  on_inequality_test:
+    - evaluate_H1_primary
+    - evaluate_H1_rate
+    - evaluate_H1_correlation
+    - record_satisfaction_status
+  on_curatorial_review:
+    - notify_reviewers
+    - collect_votes
+    - compute_decision
+    - emit_review_outcome
+  on_pof_certification:
+    - verify_all_criteria_met
+    - mint_pof_certificate
+    - record_on_chain
+    - emit_certification_event
+  end
+  
+  contract_addresses:
+    - network: ALN_mainnet
+      evidence_registry: "0x..."
+      pof_certifier: "0x..."
+      curatorial_governance: "0x..."
+  end
+@end
+
+# SKO wrapping for H1 evidence
+@sko h1_wrapping
+  modality.kind: "biomem.hypothesis.h1.evidence"
+  topic: "neuro.hypothesis-h1-evidence"
+  payload_fields:
+    - hypothesis_id
+    - participant_id_anonymized
+    - session_timestamp
+    - molecular_resource_t0
+    - molecular_resource_t1
+    - inequality_satisfied
+    - statistical_p_value
+    - effect_size
+    - pof_score
+    - evidence_hash
+  compression: optional_gzip
+  encryption: required_aes256_gcm
+  signature: required_ed25519
+  timestamp: session_timestamp
+  hash: evidence_hash
+@end
+
+# Reality.os visualization for H1
+@visualization reality_os_h1
+  render_modes:
+    - mode: hippocampus_3d_resource_map
+      description: "3D visualization of molecular resource distribution in hippocampus"
+      update_rate: 1Hz
+    - mode: consolidation_timeline
+      description: "Timeline visualization of resource change during consolidation"
+      update_rate: 0.5Hz
+    - mode: inequality_status_overlay
+      description: "Visual overlay of inequality satisfaction on brain atlas"
+      update_rate: 0.2Hz
+    - mode: pof_evidence_browser
+      description: "Interactive browser for exploring H1 evidence submissions"
+      update_rate: on_demand
+  end
+  
+  interaction_modes:
+    - inspect_trace
+    - compare_sessions
+    - view_statistics
+    - export_evidence
+  end
+  
+  color_schemes:
+    - resource_low: blue
+    - resource_medium: yellow
+    - resource_high: red
+    - inequality_satisfied: green
+    - inequality_not_satisfied: red
+  end
+@end
+
+# ============================================================================
+# SECTION: COMPLIANCE CERTIFICATION
+# ============================================================================
+
+@section compliance
+
+@certification h1_inequality_validation
+  description: All H1 inequalities must be tested and results recorded
+  enforcement_mechanism: ALN_shard_validation + encoder_check
+  violation_consequences:
+    - evidence_flagged
+    - pof_score_reduced
+    - curatorial_review_required
+  audit_frequency: per_evidence_submission
+@end
+
+@certification h1_pof_requirements
+  description: All H1 evidence must meet PoF requirements
+  enforcement_mechanism: pof_evaluation_pipeline + smart_contract
+  violation_consequences:
+    - evidence_rejected
+    - pof_certificate_denied
+    - resubmission_required
+  audit_frequency: per_evidence_submission
+@end
+
+@certification h1_safety_compliance
+  description: All H1 traces must meet safety strength requirements
+  enforcement_mechanism: safety_calculation + export_control
+  violation_consequences:
+    - export_blocked
+    - safety_remediation_required
+    - auditor_notification
+  audit_frequency: per_trace
+@end
+
+@certification h1_neurorights_protection
+  description: All H1 participants' neurorights must be protected
+  enforcement_mechanism: consent_verification + access_control
+  violation_consequences:
+    - evidence_quarantined
+    - study_suspension
+    - legal_accountability
+  audit_frequency: continuous
+@end
+
+# ============================================================================
+# SECTION: VERSION HISTORY
+# ============================================================================
+
+@section version_history
+
+@version 1.0.0
+  release_date: 2024-01-15
+  changes:
+    - Initial release
+    - Primary inequality defined
+    - Evidence requirements specified
+    - PoF/NFA evaluation pipeline established
+    - MemoryTrace integration mapped
+    - Prometheus metrics defined
+    - External system hooks configured
+  compatibility:
+    - biomem-core: >=1.0.0
+    - biomem-encoder: >=1.0.0
+    - biomem-5d.aln: >=1.0.0
+    - biomem-evolution.aln: >=1.0.0
+    - biomem.layer.microcircuit.aln: >=1.0.0
+@end
+
+@version 1.1.0
+  release_date: planned_Q2_2024
+  changes:
+    - Additional inequalities (H1_rate, H1_correlation)
+    - Enhanced evidence quality metrics
+    - Improved curatorial review workflow
+  status: planned
+@end
+
+@version 2.0.0
+  release_date: planned_Q4_2024
+  changes:
+    - Multi-region extension (beyond hippocampus)
+    - Cross-hypothesis correlation analysis
+    - Machine learning evidence validation
+  status: roadmap
+@end
+
+# ============================================================================
+# END OF SHARD
+# ============================================================================
+
+@end_shard biomem.hypothesis.h1.v1
+
+# Checksum for integrity verification (computed post-generation)
+# @checksum sha256: [AUTO_COMPUTED_ON_BUILD]
+# @signature ed25519: [SIGN_ON_PUBLISH]
