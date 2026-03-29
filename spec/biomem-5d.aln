@@ -1,0 +1,360 @@
+# path: spec/biomem-5d.aln
+# versioned, machine-parseable ALN spec for 5-D biological memory constructs.
+
+biomem_5d_spec {
+  version         = "v1.0.0";
+  namespace       = "biomem.5d";
+  description     = "5-D biologically grounded memory coordinate and hypothesis spec";
+  evidence_root   = "QPU.Datashard://biomem-5d-spec-v1";
+  organichain_ko  = "organichain://ko/biomem-5d-spec-v1";
+}
+
+# --- Core coordinate system ---
+
+coordinate_system {
+  id              = "biomem.5d.coord.v1";
+  dims            = 5;        # (x,y,z,t,sigma)
+  space_dims      = 3;        # 3D cortical/source space
+  time_dim        = 1;        # scalar time coordinate
+  state_dim_ref   = "biomem.5d.state.schema.v1";
+  atlas_ref       = "neuro.atlas.yuo-7net.v1";      # subject-specific, resolved at runtime
+  leadfield_ref   = "neuro.leadfield.subject.v1";   # L in v_t = L j_t + ε_t
+}
+
+state_schema biomem.5d.state.schema.v1 {
+  # Internal state σ = (σ^1,...,σ^5); each layer is a fixed-length vector.
+  layer_1_molecular {
+    dim           = 32;
+    desc          = "Molecular-scale markers (receptor states, neuromodulators, PTMs)";
+    feature_keys  = [
+      "AMPAR_phospho", "NMDAR_density", "GABAR_density",
+      "5HT_local", "DA_local", "NE_local",
+      "BDNF_tag", "CREB_phospho",
+      "glutamate_cleft", "GABA_cleft",
+      "astrocyte_uptake", "microglia_activation",
+      "CaMKII_state", "PKA_state",
+      "phosphatase_state", "ubiquitin_tag",
+      "synapse_tag_LTP", "synapse_tag_LTD",
+      "mRNA_local", "protein_synthesis_rate",
+      "oxidative_stress", "redox_state",
+      "energy_ATP_local", "lactate_local",
+      "ion_homeostasis", "NaK_pump_state",
+      "Ca_buffer_state", "mito_potential",
+      "membrane_fluidity", "lipid_rafts",
+      "reserve_1", "reserve_2"
+    ];
+  }
+
+  layer_2_synaptic {
+    dim           = 32;
+    desc          = "Synaptic weights and plasticity parameters";
+    feature_keys  = [
+      "Δw_exc", "Δw_inh", "STP_facilitation", "STP_depression",
+      "pre_rate", "post_rate",
+      "STDP_pre_post", "STDP_post_pre",
+      "syn_release_prob", "vesicle_pool",
+      "axonal_delay", "dendritic_delay",
+      "syn_noise", "syn_failure_rate",
+      "gap_junction_strength", "E_ion_shift",
+      "NMDA_ratio", "AMPA_ratio",
+      "GABA_A_ratio", "GABA_B_ratio",
+      "syn_cluster_index", "syn_pruning_rate",
+      "reserve_syn_1", "reserve_syn_2",
+      "reserve_syn_3", "reserve_syn_4",
+      "reserve_syn_5", "reserve_syn_6",
+      "reserve_syn_7", "reserve_syn_8",
+      "reserve_syn_9", "reserve_syn_10"
+    ];
+  }
+
+  layer_3_microcircuit {
+    dim           = 32;
+    desc          = "Local microcircuit motifs and inhibition/excitation structure";
+    feature_keys  = [
+      "E_I_ratio", "PV_inh_strength", "SST_inh_strength", "VIP_inh_strength",
+      "pyramidal_burst_prob", "local_clustering_coef",
+      "motif_3chain_freq", "motif_feedforward_freq",
+      "motif_feedback_freq", "hubness_local",
+      "local_path_length", "micro_circuit_entropy",
+      "osc_power_gamma_local", "osc_power_beta_local",
+      "osc_power_theta_local", "osc_power_alpha_local",
+      "phase_lock_inh_exc", "phase_lock_exc_exc",
+      "criticality_index", "avalanching_index",
+      "reserve_mc_1", "reserve_mc_2",
+      "reserve_mc_3", "reserve_mc_4",
+      "reserve_mc_5", "reserve_mc_6",
+      "reserve_mc_7", "reserve_mc_8",
+      "reserve_mc_9", "reserve_mc_10"
+    ];
+  }
+
+  layer_4_network {
+    dim           = 64;
+    desc          = "Mesoscale network features from EEG/MEG/connectome";
+    feature_keys  = [
+      "degree_centrality_SMN", "degree_centrality_DMN",
+      "degree_centrality_FPN", "degree_centrality_VIS",
+      "degree_centrality_SAN", "degree_centrality_LIMBIC",
+      "betweenness_SMN", "betweenness_DMN",
+      "betweenness_FPN", "betweenness_VIS",
+      "betweenness_SAN", "betweenness_LIMBIC",
+      "modularity_Q", "small_worldness",
+      "global_efficiency", "local_efficiency",
+      "Cij_motor_alpha", "Cij_motor_beta",
+      "Cij_vis_alpha", "Cij_vis_gamma",
+      "Cij_FP_control_beta", "Cij_DM_theta",
+      "eigen_centrality_SMN", "eigen_centrality_DMN",
+      "laplacian_lambda2", "laplacian_spectral_gap",
+      "entropy_network_state", "complexity_multiscale",
+      "reserve_net_1", "reserve_net_2",
+      "reserve_net_3", "reserve_net_4",
+      "reserve_net_5", "reserve_net_6",
+      "reserve_net_7", "reserve_net_8",
+      "reserve_net_9", "reserve_net_10",
+      "reserve_net_11", "reserve_net_12",
+      "reserve_net_13", "reserve_net_14",
+      "reserve_net_15", "reserve_net_16",
+      "reserve_net_17", "reserve_net_18",
+      "reserve_net_19", "reserve_net_20",
+      "reserve_net_21", "reserve_net_22",
+      "reserve_net_23", "reserve_net_24",
+      "reserve_net_25", "reserve_net_26",
+      "reserve_net_27", "reserve_net_28",
+      "reserve_net_29", "reserve_net_30",
+      "reserve_net_31", "reserve_net_32"
+    ];
+  }
+
+  layer_5_systemic {
+    dim           = 32;
+    desc          = "Systemic/autonomic/endocrine and cybernetic resource state";
+    feature_keys  = [
+      "HRV_lnrmssd", "EDA_tonic", "EDA_phasic",
+      "resp_rate", "blood_glucose_index",
+      "blood_oxygen_index", "core_temp_index",
+      "cortisol_proxy", "circadian_phase",
+      "energy_SUGAR_budget", "energy_PROTEIN_budget",
+      "energy_BLOOD_budget",
+      "RoH_scalar", "KnowledgeFactor_scalar",
+      "Cybostate_scalar", "SafetyStrength_scalar",
+      "HealthStrength_scalar",
+      "nanoswarm_guard_state",
+      "psychrisk_index",
+      "stress_index",
+      "reserve_sys_1", "reserve_sys_2",
+      "reserve_sys_3", "reserve_sys_4",
+      "reserve_sys_5", "reserve_sys_6",
+      "reserve_sys_7", "reserve_sys_8",
+      "reserve_sys_9", "reserve_sys_10"
+    ];
+  }
+}
+
+# --- Memory trace base type ---
+
+type memory_trace.v1 {
+  coord_space_3d {
+    x_mm          : float32;   # cortical/source x (mm or atlas-space)
+    y_mm          : float32;
+    z_mm          : float32;
+    atlas_vertex  : uint32;    # index into cortical mesh
+  }
+
+  coord_time {
+    t_sec         : float64;   # seconds since session_origin
+    session_id    : string;
+    block_height  : uint64;    # Organichain / Bostrom-linked time
+  }
+
+  coord_state {
+    # Flat concatenation σ ∈ R^{d1+...+d5}
+    sigma_layer_1 : vector<float32, 32>;
+    sigma_layer_2 : vector<float32, 32>;
+    sigma_layer_3 : vector<float32, 32>;
+    sigma_layer_4 : vector<float32, 64>;
+    sigma_layer_5 : vector<float32, 32>;
+    encoder_ref   : string;    # e.g., "biomem.encoder.eeg.codec.v1"
+  }
+
+  # Resource-counted, non-invertible encoding (ct,i = round(s_i f_{t,i} 10^{p_i}))
+  codeword {
+    hex_block     : string;    # fixed-length hex for entire σ
+    l1_norm       : uint64;
+    digit_count   : uint32;
+    nonzero_nibbles : uint32;
+    sparsity      : float32;   # zeros / total nibbles
+    encoder_scale_hash : bytes32;
+  }
+
+  # Risk & sovereignty scalars
+  risk_context {
+    RoH           : float32;   # ≤ 0.30 enforced elsewhere
+    KnowledgeFactor : float32;
+    SafetyStrength  : float32;
+    HealthStrength  : float32;
+    nullspace_dim   : uint32;  # dim ker W at encoding
+  }
+
+  provenance {
+    subject_did   : string;
+    brainprint_hash : bytes32;
+    organichain_decoder_id : string;
+    bostrom_address : string;
+    dataset_ref   : string;    # Galea/MT6883 evidence shard
+  }
+}
+
+# --- Hypothesis schema ---
+
+hypothesis_schema biomem.5d.hypothesis.v1 {
+  id              : string;
+  label           : string;
+  description     : string;
+  layer_scope     : string;    # "L1", "L2",..., "L1-L5"
+  math_form       : string;    # human-readable inequality/equation
+  eval_window_sec : float32;   # time window for testing
+  binding {
+    feature_keys  : [string];  # which σ components / resource counters
+  }
+  inequality {
+    lhs_expr      : string;    # ALN-executable scalar expression
+    op            : string;    # "<=", ">=", "=="
+    rhs_expr      : string;    # scalar expression or const
+  }
+  status          : string;    # "candidate" | "validated" | "rejected"
+  evidence_shard  : string;    # QPU.Datashard ref for logs/proofs
+}
+
+# --------------------------------------------------------------------
+# Five concrete, testable hypotheses (H1–H5)
+# All phrased as scalar inequalities on resource-counted fields,
+# suitable for PoF + NFA and OTA proof integration.
+# --------------------------------------------------------------------
+
+hypothesis biomem.H1.molecular_stability_under_recall.v1 {
+  id              = "biomem.H1.molecular_stability_under_recall.v1";
+  label           = "Molecular corridor during stable recall";
+  description     = "During stable recall epochs, the molecular L1 norm of σ^1 remains within a tight corridor, indicating bounded nanomolecular reconfiguration.";
+  layer_scope     = "L1";
+  eval_window_sec = 2.0;
+
+  binding {
+    feature_keys  = ["sigma_layer_1", "codeword.l1_norm", "risk_context.RoH"];
+  }
+
+  math_form       = "For any recall window W of length ≥ 2s with RoH ≤ 0.3, Δ R_mol_L1(W) ≤ ε_mol.";
+
+  inequality {
+    # R_mol_L1(W) = average L1 over σ^1 within window W
+    lhs_expr      = "max_over_window(L1(sigma_layer_1)) - min_over_window(L1(sigma_layer_1))";
+    op            = "<=";
+    rhs_expr      = "epsilon_mol";    # learned constant, 0 < epsilon_mol << baseline_L1
+  }
+
+  status          = "candidate";
+  evidence_shard  = "QPU.Datashard://biomem/H1/logs.v1";
+}
+
+hypothesis biomem.H2.synaptic_recall_potentiation.v1 {
+  id              = "biomem.H2.synaptic_recall_potentiation.v1";
+  label           = "Synaptic potentiation signature of recall";
+  description     = "Successful recall trials show a reproducible positive shift in synaptic potentiation coordinates of σ^2 relative to matched baseline windows.";
+  layer_scope     = "L2";
+  eval_window_sec = 3.0;
+
+  binding {
+    feature_keys  = ["sigma_layer_2", "risk_context.KnowledgeFactor"];
+  }
+
+  math_form       = "E[Δ w_recall] ≥ θ_syn > 0 when KnowledgeFactor increases over the session.";
+
+  inequality {
+    # Δw_recall = mean of potentiation-related σ^2 indices between recall and baseline
+    lhs_expr      = "mean(sigma_layer_2[0:8]_recall) - mean(sigma_layer_2[0:8]_baseline)";
+    op            = ">=";
+    rhs_expr      = "theta_syn";      # positive threshold calibrated per subject
+  }
+
+  status          = "candidate";
+  evidence_shard  = "QPU.Datashard://biomem/H2/logs.v1";
+}
+
+hypothesis biomem.H3_microcircuit_inhibition_corridor.v1 {
+  id              = "biomem.H3.microcircuit_inhibition_corridor.v1";
+  label           = "Microcircuit E/I corridor for stable recall";
+  description     = "Stable, low-RoH recall states occupy a restricted corridor of E/I ratios and inhibition strengths in σ^3.";
+  layer_scope     = "L3";
+  eval_window_sec = 1.5;
+
+  binding {
+    feature_keys  = ["sigma_layer_3", "risk_context.RoH"];
+  }
+
+  math_form       = "For recall with RoH ≤ 0.3, E_I_ratio_min ≤ E_I_ratio(t) ≤ E_I_ratio_max.";
+
+  inequality {
+    lhs_expr      = "max_over_window(sigma_layer_3[0])";   # index 0 = E_I_ratio
+    op            = "<=";
+    rhs_expr      = "E_I_ratio_max";
+  }
+
+  status          = "candidate";
+  evidence_shard  = "QPU.Datashard://biomem/H3/logs.v1";
+}
+
+hypothesis biomem.H4_network_coupling_memory_band.v1 {
+  id              = "biomem.H4.network_coupling_memory_band.v1";
+  label           = "Network coupling band for memory expression";
+  description     = "During successful recall, network-level coupling between somatomotor and visual bands follows a reproducible ratio corridor in σ^4.";
+  layer_scope     = "L4";
+  eval_window_sec = 2.0;
+
+  binding {
+    feature_keys  = [
+      "sigma_layer_4",
+      "codeword.l1_norm",
+      "risk_context.KnowledgeFactor"
+    ];
+  }
+
+  math_form       = "For recall epochs, ratio r = C_motor_alpha / C_vis_alpha lies in [r_min, r_max] and correlates with KnowledgeFactor.";
+
+  inequality {
+    lhs_expr      = "abs( (sigma_layer_4[16] / sigma_layer_4[18]) - r_star )";
+    op            = "<=";
+    rhs_expr      = "delta_r";
+  }
+
+  status          = "candidate";
+  evidence_shard  = "QPU.Datashard://biomem/H4/logs.v1";
+}
+
+hypothesis biomem.H5_systemic_energy_safety_monotone.v1 {
+  id              = "biomem.H5.systemic_energy_safety_monotone.v1";
+  label           = "Systemic energy + safety monotonicity under learning";
+  description     = "Across learning-induced memory updates, systemic energy budgets and SafetyStrength form a non-degrading tuple, suitable for PoF + NFA charter binding.";
+  layer_scope     = "L5";
+  eval_window_sec = 0.0;   # evaluated across evolution steps, not within a short window
+
+  binding {
+    feature_keys  = [
+      "sigma_layer_5[9]",  # energy_SUGAR_budget
+      "sigma_layer_5[10]", # energy_PROTEIN_budget
+      "sigma_layer_5[11]", # energy_BLOOD_budget
+      "risk_context.SafetyStrength",
+      "risk_context.HealthStrength",
+      "risk_context.RoH"
+    ];
+  }
+
+  math_form       = "For any accepted evolution step k → k+1, E_SUGAR, E_PROTEIN, E_BLOOD, SafetyStrength, HealthStrength are non-decreasing while RoH is non-increasing.";
+
+  inequality {
+    lhs_expr      = "tuple_diff( E_SUGAR_k1 - E_SUGAR_k, E_PROTEIN_k1 - E_PROTEIN_k, E_BLOOD_k1 - E_BLOOD_k, SafetyStrength_k1 - SafetyStrength_k, HealthStrength_k1 - HealthStrength_k, RoH_k1 - RoH_k )";
+    op            = "charter_monotone";   # interpreted by charter-proof engine
+    rhs_expr      = ">=_for_energy_safety_<=_for_RoH";
+  }
+
+  status          = "candidate";
+  evidence_shard  = "QPU.Datashard://biomem/H5/evolution_logs.v1";
+}
