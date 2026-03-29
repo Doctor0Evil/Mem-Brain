@@ -1,32 +1,104 @@
-# path: spec/biomem-5d.aln
-# versioned, machine-parseable ALN spec for 5-D biological memory constructs.
+# ============================================================================
+# SHARD: biomem.5d.aln
+# PATH:  spec/biomem-5d.aln
+# VER:   1.0.0
+# LIC:   Data_Lake Sovereign License
+# DESC:  ALN shard specification for 5-D biophysical memory coordinates.
+#        Defines coordinate axes, layer taxonomy, invariants, dimensional
+#        constraints, hypothesis schema, and external bindings.
+# ============================================================================
 
-biomem_5d_spec {
-  version         = "v1.0.0";
-  namespace       = "biomem.5d";
-  description     = "5-D biologically grounded memory coordinate and hypothesis spec";
-  evidence_root   = "QPU.Datashard://biomem-5d-spec-v1";
-  organichain_ko  = "organichain://ko/biomem-5d-spec-v1";
-}
+@shard biomem.5d.v1
+@version 1.0.0
+@created 2024-01-15T00:00:00Z
+@author Data_Lake Sovereign Research
+@license MIT-Sovereign
+@compatibility biomem-core>=1.0.0, biomem-encoder>=1.0.0
 
-# --- Core coordinate system ---
+# ----------------------------------------------------------------------------
+# SECTION: CORE SPEC METADATA
+# ----------------------------------------------------------------------------
 
-coordinate_system {
-  id              = "biomem.5d.coord.v1";
-  dims            = 5;        # (x,y,z,t,sigma)
-  space_dims      = 3;        # 3D cortical/source space
-  time_dim        = 1;        # scalar time coordinate
-  state_dim_ref   = "biomem.5d.state.schema.v1";
-  atlas_ref       = "neuro.atlas.yuo-7net.v1";      # subject-specific, resolved at runtime
-  leadfield_ref   = "neuro.leadfield.subject.v1";   # L in v_t = L j_t + ε_t
-}
+@section spec_metadata
 
-state_schema biomem.5d.state.schema.v1 {
-  # Internal state σ = (σ^1,...,σ^5); each layer is a fixed-length vector.
-  layer_1_molecular {
-    dim           = 32;
-    desc          = "Molecular-scale markers (receptor states, neuromodulators, PTMs)";
-    feature_keys  = [
+@spec biomem_5d_spec
+  version        = "v1.0.0"
+  namespace      = "biomem.5d"
+  description    = "5-D biologically grounded memory coordinate and hypothesis spec"
+  evidence_root  = "QPU.Datashard://biomem-5d-spec-v1"
+  organichain_ko = "organichain://ko/biomem-5d-spec-v1"
+@end
+
+# ----------------------------------------------------------------------------
+# SECTION: COORDINATE AXES DEFINITION
+# ----------------------------------------------------------------------------
+
+@section coordinate_axes
+
+# Axis 1-3: Spatial Coordinates (millimetres in atlas frame)
+@axis spatial.x
+  type: f32
+  unit: mm
+  range: [-100.0, 100.0]
+  atlas: MNI152
+  nullable: false
+  invariant: not_nan
+@end
+
+@axis spatial.y
+  type: f32
+  unit: mm
+  range: [-100.0, 100.0]
+  atlas: MNI152
+  nullable: false
+  invariant: not_nan
+@end
+
+@axis spatial.z
+  type: f32
+  unit: mm
+  range: [-100.0, 100.0]
+  atlas: MNI152
+  nullable: false
+  invariant: not_nan
+@end
+
+# Axis 4: Temporal Coordinate (seconds since session origin / mapped block time)
+@axis temporal.t
+  type: f64
+  unit: seconds
+  range: [0.0, 4102444800.0]
+  epoch: UNIX_1970
+  nullable: false
+  invariant: monotonic_increase
+  precision: milliseconds
+@end
+
+# Axis 5: Internal State Code (compressed feature vector)
+@axis internal.code
+  type: vector<f32>
+  unit: normalized
+  range: [0.0, 1.0]
+  dimensions: variable
+  nullable: false
+  invariant: non_invertible
+  compression: lossy_allowed
+@end
+
+# ----------------------------------------------------------------------------
+# SECTION: INTERNAL STATE SCHEMA (σ LAYERS)
+# ----------------------------------------------------------------------------
+
+@section state_schema
+
+# σ = (σ^1,...,σ^5); each layer is a fixed-length vector with named features.
+
+@state_schema biomem.5d.state.v1
+
+  @layer_1_molecular
+    dim          = 32
+    description  = "Molecular-scale markers (receptor states, neuromodulators, PTMs)"
+    feature_keys = [
       "AMPAR_phospho", "NMDAR_density", "GABAR_density",
       "5HT_local", "DA_local", "NE_local",
       "BDNF_tag", "CREB_phospho",
@@ -42,14 +114,14 @@ state_schema biomem.5d.state.schema.v1 {
       "Ca_buffer_state", "mito_potential",
       "membrane_fluidity", "lipid_rafts",
       "reserve_1", "reserve_2"
-    ];
-  }
+    ]
+  @end
 
-  layer_2_synaptic {
-    dim           = 32;
-    desc          = "Synaptic weights and plasticity parameters";
-    feature_keys  = [
-      "Δw_exc", "Δw_inh", "STP_facilitation", "STP_depression",
+  @layer_2_synaptic
+    dim          = 32
+    description  = "Synaptic weights and plasticity parameters"
+    feature_keys = [
+      "Delta_w_exc", "Delta_w_inh", "STP_facilitation", "STP_depression",
       "pre_rate", "post_rate",
       "STDP_pre_post", "STDP_post_pre",
       "syn_release_prob", "vesicle_pool",
@@ -64,13 +136,13 @@ state_schema biomem.5d.state.schema.v1 {
       "reserve_syn_5", "reserve_syn_6",
       "reserve_syn_7", "reserve_syn_8",
       "reserve_syn_9", "reserve_syn_10"
-    ];
-  }
+    ]
+  @end
 
-  layer_3_microcircuit {
-    dim           = 32;
-    desc          = "Local microcircuit motifs and inhibition/excitation structure";
-    feature_keys  = [
+  @layer_3_microcircuit
+    dim          = 32
+    description  = "Local microcircuit motifs and inhibition/excitation structure"
+    feature_keys = [
       "E_I_ratio", "PV_inh_strength", "SST_inh_strength", "VIP_inh_strength",
       "pyramidal_burst_prob", "local_clustering_coef",
       "motif_3chain_freq", "motif_feedforward_freq",
@@ -85,13 +157,13 @@ state_schema biomem.5d.state.schema.v1 {
       "reserve_mc_5", "reserve_mc_6",
       "reserve_mc_7", "reserve_mc_8",
       "reserve_mc_9", "reserve_mc_10"
-    ];
-  }
+    ]
+  @end
 
-  layer_4_network {
-    dim           = 64;
-    desc          = "Mesoscale network features from EEG/MEG/connectome";
-    feature_keys  = [
+  @layer_4_network
+    dim          = 64
+    description  = "Mesoscale network features from EEG/MEG/connectome"
+    feature_keys = [
       "degree_centrality_SMN", "degree_centrality_DMN",
       "degree_centrality_FPN", "degree_centrality_VIS",
       "degree_centrality_SAN", "degree_centrality_LIMBIC",
@@ -122,13 +194,13 @@ state_schema biomem.5d.state.schema.v1 {
       "reserve_net_27", "reserve_net_28",
       "reserve_net_29", "reserve_net_30",
       "reserve_net_31", "reserve_net_32"
-    ];
-  }
+    ]
+  @end
 
-  layer_5_systemic {
-    dim           = 32;
-    desc          = "Systemic/autonomic/endocrine and cybernetic resource state";
-    feature_keys  = [
+  @layer_5_systemic
+    dim          = 32
+    description  = "Systemic/autonomic/endocrine and cybernetic resource state"
+    feature_keys = [
       "HRV_lnrmssd", "EDA_tonic", "EDA_phasic",
       "resp_rate", "blood_glucose_index",
       "blood_oxygen_index", "core_temp_index",
@@ -146,215 +218,518 @@ state_schema biomem.5d.state.schema.v1 {
       "reserve_sys_5", "reserve_sys_6",
       "reserve_sys_7", "reserve_sys_8",
       "reserve_sys_9", "reserve_sys_10"
-    ];
-  }
-}
+    ]
+  @end
 
-# --- Memory trace base type ---
+@end_state_schema
 
-type memory_trace.v1 {
-  coord_space_3d {
-    x_mm          : float32;   # cortical/source x (mm or atlas-space)
-    y_mm          : float32;
-    z_mm          : float32;
-    atlas_vertex  : uint32;    # index into cortical mesh
-  }
+# ----------------------------------------------------------------------------
+# SECTION: BIOPHYSICAL LAYER TAXONOMY
+# ----------------------------------------------------------------------------
 
-  coord_time {
-    t_sec         : float64;   # seconds since session_origin
-    session_id    : string;
-    block_height  : uint64;    # Organichain / Bostrom-linked time
-  }
+@section biophysical_layers
 
-  coord_state {
-    # Flat concatenation σ ∈ R^{d1+...+d5}
-    sigma_layer_1 : vector<float32, 32>;
-    sigma_layer_2 : vector<float32, 32>;
-    sigma_layer_3 : vector<float32, 32>;
-    sigma_layer_4 : vector<float32, 64>;
-    sigma_layer_5 : vector<float32, 32>;
-    encoder_ref   : string;    # e.g., "biomem.encoder.eeg.codec.v1"
-  }
+@layer molecular
+  index: 0
+  description: "Atomic and molecular scale mechanisms (protein conformations, epigenetics)"
+  state_vector: molecular
+  min_dimensions: 0
+  max_dimensions: 1024
+  feature_types: [phosphorylation, methylation, conformation]
+  proxies: [nanomolecular_density, receptor_state]
+  validation:
+    - element_range: [0.0, 1.0]
+    - not_nan: true
+@end
 
-  # Resource-counted, non-invertible encoding (ct,i = round(s_i f_{t,i} 10^{p_i}))
-  codeword {
-    hex_block     : string;    # fixed-length hex for entire σ
-    l1_norm       : uint64;
-    digit_count   : uint32;
-    nonzero_nibbles : uint32;
-    sparsity      : float32;   # zeros / total nibbles
-    encoder_scale_hash : bytes32;
-  }
+@layer synaptic
+  index: 1
+  description: "Synaptic weights, spine morphology, plasticity mechanisms"
+  state_vector: synaptic
+  min_dimensions: 0
+  max_dimensions: 512
+  feature_types: [weight, spine_volume, plasticity_rate]
+  proxies: [LTP_magnitude, LTD_magnitude, spine_density]
+  validation:
+    - element_range: [0.0, 1.0]
+    - not_nan: true
+@end
 
-  # Risk & sovereignty scalars
-  risk_context {
-    RoH           : float32;   # ≤ 0.30 enforced elsewhere
-    KnowledgeFactor : float32;
-    SafetyStrength  : float32;
-    HealthStrength  : float32;
-    nullspace_dim   : uint32;  # dim ker W at encoding
-  }
+@layer microcircuit
+  index: 2
+  description: "Local neuronal ensembles and graph motifs"
+  state_vector: microcircuit
+  min_dimensions: 2
+  max_dimensions: 256
+  feature_types: [bandpower, coherence, firing_rate]
+  proxies: [theta_power, alpha_power, gamma_power]
+  validation:
+    - element_range: [0.0, 1.0]
+    - min_elements: 2
+    - required_features: [bandpower_theta, bandpower_alpha]
+@end
 
-  provenance {
-    subject_did   : string;
-    brainprint_hash : bytes32;
-    organichain_decoder_id : string;
-    bostrom_address : string;
-    dataset_ref   : string;    # Galea/MT6883 evidence shard
-  }
-}
+@layer mesoscopic_network
+  index: 3
+  description: "Large-scale brain networks (structural and functional connectivity)"
+  state_vector: network
+  min_dimensions: 1
+  max_dimensions: 128
+  feature_types: [connectivity, modularity, efficiency]
+  proxies: [DMN_coherence, FPN_connectivity, SN_salience]
+  validation:
+    - element_range: [0.0, 1.0]
+    - min_elements: 1
+    - required_features: [coherence_dm]
+@end
 
-# --- Hypothesis schema ---
+@layer systemic_context
+  index: 4
+  description: "Global neuromodulatory state, behavioral context, environmental encoding"
+  state_vector: systemic
+  min_dimensions: 4
+  max_dimensions: 64
+  feature_types: [neuromodulator, behavioral, physiological, safety]
+  proxies: [HRV, RoH, knowledge_factor, safety_strength]
+  validation:
+    - element_range: [0.0, 1.0]
+    - min_elements: 4
+    - required_features: [hrv, roh, knowledge_factor, safety_strength]
+@end
 
-hypothesis_schema biomem.5d.hypothesis.v1 {
-  id              : string;
-  label           : string;
-  description     : string;
-  layer_scope     : string;    # "L1", "L2",..., "L1-L5"
-  math_form       : string;    # human-readable inequality/equation
-  eval_window_sec : float32;   # time window for testing
-  binding {
-    feature_keys  : [string];  # which σ components / resource counters
-  }
-  inequality {
-    lhs_expr      : string;    # ALN-executable scalar expression
-    op            : string;    # "<=", ">=", "=="
-    rhs_expr      : string;    # scalar expression or const
-  }
-  status          : string;    # "candidate" | "validated" | "rejected"
-  evidence_shard  : string;    # QPU.Datashard ref for logs/proofs
-}
+# ----------------------------------------------------------------------------
+# SECTION: MEMORY TRACE TYPE
+# ----------------------------------------------------------------------------
 
-# --------------------------------------------------------------------
-# Five concrete, testable hypotheses (H1–H5)
-# All phrased as scalar inequalities on resource-counted fields,
-# suitable for PoF + NFA and OTA proof integration.
-# --------------------------------------------------------------------
+@section memory_trace_type
 
-hypothesis biomem.H1.molecular_stability_under_recall.v1 {
-  id              = "biomem.H1.molecular_stability_under_recall.v1";
-  label           = "Molecular corridor during stable recall";
-  description     = "During stable recall epochs, the molecular L1 norm of σ^1 remains within a tight corridor, indicating bounded nanomolecular reconfiguration.";
-  layer_scope     = "L1";
-  eval_window_sec = 2.0;
+@type memory_trace.v1
 
-  binding {
-    feature_keys  = ["sigma_layer_1", "codeword.l1_norm", "risk_context.RoH"];
-  }
+  @coord_space_3d
+    x_mm         : float32
+    y_mm         : float32
+    z_mm         : float32
+    atlas_vertex : uint32      # index into cortical mesh
+  @end
 
-  math_form       = "For any recall window W of length ≥ 2s with RoH ≤ 0.3, Δ R_mol_L1(W) ≤ ε_mol.";
+  @coord_time
+    t_sec        : float64     # seconds since session_origin
+    session_id   : string
+    block_height : uint64      # Organichain / Bostrom-linked time
+  @end
 
-  inequality {
-    # R_mol_L1(W) = average L1 over σ^1 within window W
-    lhs_expr      = "max_over_window(L1(sigma_layer_1)) - min_over_window(L1(sigma_layer_1))";
-    op            = "<=";
-    rhs_expr      = "epsilon_mol";    # learned constant, 0 < epsilon_mol << baseline_L1
-  }
+  @coord_state
+    sigma_layer_1 : vector<float32, 32>
+    sigma_layer_2 : vector<float32, 32>
+    sigma_layer_3 : vector<float32, 32>
+    sigma_layer_4 : vector<float32, 64>
+    sigma_layer_5 : vector<float32, 32>
+    encoder_ref   : string     # e.g., "biomem.encoder.eeg.codec.v1"
+  @end
 
-  status          = "candidate";
-  evidence_shard  = "QPU.Datashard://biomem/H1/logs.v1";
-}
+  @codeword
+    hex_block          : string
+    l1_norm            : uint64
+    digit_count        : uint32
+    nonzero_nibbles    : uint32
+    sparsity           : float32
+    encoder_scale_hash : bytes32
+  @end
 
-hypothesis biomem.H2.synaptic_recall_potentiation.v1 {
-  id              = "biomem.H2.synaptic_recall_potentiation.v1";
-  label           = "Synaptic potentiation signature of recall";
-  description     = "Successful recall trials show a reproducible positive shift in synaptic potentiation coordinates of σ^2 relative to matched baseline windows.";
-  layer_scope     = "L2";
-  eval_window_sec = 3.0;
+  @risk_context
+    RoH             : float32
+    KnowledgeFactor : float32
+    SafetyStrength  : float32
+    HealthStrength  : float32
+    nullspace_dim   : uint32
+  @end
 
-  binding {
-    feature_keys  = ["sigma_layer_2", "risk_context.KnowledgeFactor"];
-  }
+  @provenance
+    subject_did           : string
+    brainprint_hash       : bytes32
+    organichain_decoder_id: string
+    bostrom_address       : string
+    dataset_ref           : string
+  @end
 
-  math_form       = "E[Δ w_recall] ≥ θ_syn > 0 when KnowledgeFactor increases over the session.";
+@end_type
 
-  inequality {
-    # Δw_recall = mean of potentiation-related σ^2 indices between recall and baseline
-    lhs_expr      = "mean(sigma_layer_2[0:8]_recall) - mean(sigma_layer_2[0:8]_baseline)";
-    op            = ">=";
-    rhs_expr      = "theta_syn";      # positive threshold calibrated per subject
-  }
+# ----------------------------------------------------------------------------
+# SECTION: BASE INVARIANTS
+# ----------------------------------------------------------------------------
 
-  status          = "candidate";
-  evidence_shard  = "QPU.Datashard://biomem/H2/logs.v1";
-}
+@section base_invariants
 
-hypothesis biomem.H3_microcircuit_inhibition_corridor.v1 {
-  id              = "biomem.H3.microcircuit_inhibition_corridor.v1";
-  label           = "Microcircuit E/I corridor for stable recall";
-  description     = "Stable, low-RoH recall states occupy a restricted corridor of E/I ratios and inhibition strengths in σ^3.";
-  layer_scope     = "L3";
-  eval_window_sec = 1.5;
+@invariant roh_ceiling
+  field: risk_context.RoH
+  operator: <=
+  value: 0.30
+  severity: critical
+  enforcement: hard
+  description: "Maximum allowable Risk-of-Harm for exportable traces"
+  violation_action: reject_trace
+@end
 
-  binding {
-    feature_keys  = ["sigma_layer_3", "risk_context.RoH"];
-  }
+@invariant safety_floor
+  field: risk_context.SafetyStrength
+  operator: >=
+  value: 0.75
+  severity: critical
+  enforcement: hard
+  description: "Minimum safety strength for off-host trace transmission"
+  violation_action: reject_trace
+@end
 
-  math_form       = "For recall with RoH ≤ 0.3, E_I_ratio_min ≤ E_I_ratio(t) ≤ E_I_ratio_max.";
+@invariant knowledge_floor
+  field: risk_context.KnowledgeFactor
+  operator: >=
+  value: 0.50
+  severity: critical
+  enforcement: hard
+  description: "Minimum knowledge factor for Proof-of-Functionality validation"
+  violation_action: reject_trace
+@end
 
-  inequality {
-    lhs_expr      = "max_over_window(sigma_layer_3[0])";   # index 0 = E_I_ratio
-    op            = "<=";
-    rhs_expr      = "E_I_ratio_max";
-  }
+@invariant nullspace_floor
+  field: risk_context.nullspace_dim
+  operator: >=
+  value: 128
+  severity: warning
+  enforcement: soft
+  description: "Recommended minimum null-space dimension for privacy preservation"
+  violation_action: flag_for_review
+@end
 
-  status          = "candidate";
-  evidence_shard  = "QPU.Datashard://biomem/H3/logs.v1";
-}
+@invariant non_invertible
+  field: codeword.hex_block
+  operator: no_reverse_mapping
+  value: true
+  severity: critical
+  enforcement: hard
+  description: "Trace must not allow reconstruction of raw input data"
+  violation_action: reject_trace
+@end
 
-hypothesis biomem.H4_network_coupling_memory_band.v1 {
-  id              = "biomem.H4.network_coupling_memory_band.v1";
-  label           = "Network coupling band for memory expression";
-  description     = "During successful recall, network-level coupling between somatomotor and visual bands follows a reproducible ratio corridor in σ^4.";
-  layer_scope     = "L4";
-  eval_window_sec = 2.0;
+@invariant monotonic_growth
+  field: trace.complexity_score
+  operator: non_decreasing
+  value: true
+  severity: critical
+  enforcement: hard
+  description: "Trace complexity must not decrease with updates"
+  violation_action: reject_update
+@end
 
-  binding {
-    feature_keys  = [
-      "sigma_layer_4",
-      "codeword.l1_norm",
-      "risk_context.KnowledgeFactor"
-    ];
-  }
+@invariant version_match
+  field: trace.version
+  operator: semver_compatible
+  value: "1.0.0"
+  severity: warning
+  enforcement: soft
+  description: "Trace version must be semver-compatible with core specification"
+  violation_action: flag_for_review
+@end
 
-  math_form       = "For recall epochs, ratio r = C_motor_alpha / C_vis_alpha lies in [r_min, r_max] and correlates with KnowledgeFactor.";
+# ----------------------------------------------------------------------------
+# SECTION: DIMENSIONAL CONSTRAINTS
+# ----------------------------------------------------------------------------
 
-  inequality {
-    lhs_expr      = "abs( (sigma_layer_4[16] / sigma_layer_4[18]) - r_star )";
-    op            = "<=";
-    rhs_expr      = "delta_r";
-  }
+@section dimensional_constraints
 
-  status          = "candidate";
-  evidence_shard  = "QPU.Datashard://biomem/H4/logs.v1";
-}
+@constraint total_dimensions
+  formula: "len(sigma_layer_1) + len(sigma_layer_2) + len(sigma_layer_3) + len(sigma_layer_4) + len(sigma_layer_5) >= 7"
+  description: "Minimum total dimensions across all layers (2 microcircuit + 1 network + 4 systemic)"
+  enforcement: hard
+@end
 
-hypothesis biomem.H5_systemic_energy_safety_monotone.v1 {
-  id              = "biomem.H5.systemic_energy_safety_monotone.v1";
-  label           = "Systemic energy + safety monotonicity under learning";
-  description     = "Across learning-induced memory updates, systemic energy budgets and SafetyStrength form a non-degrading tuple, suitable for PoF + NFA charter binding.";
-  layer_scope     = "L5";
-  eval_window_sec = 0.0;   # evaluated across evolution steps, not within a short window
+@constraint max_dimensions
+  formula: "len(sigma_layer_1) + len(sigma_layer_2) + len(sigma_layer_3) + len(sigma_layer_4) + len(sigma_layer_5) <= 2048"
+  description: "Maximum total dimensions to prevent resource exhaustion"
+  enforcement: hard
+@end
 
-  binding {
-    feature_keys  = [
-      "sigma_layer_5[9]",  # energy_SUGAR_budget
-      "sigma_layer_5[10]", # energy_PROTEIN_budget
-      "sigma_layer_5[11]", # energy_BLOOD_budget
-      "risk_context.SafetyStrength",
-      "risk_context.HealthStrength",
-      "risk_context.RoH"
-    ];
-  }
+@constraint layer_balance
+  formula: "max(layer_dims) / min(nonzero_layer_dims) <= 16.0"
+  description: "Prevent extreme imbalance between layer allocations"
+  enforcement: soft
+@end
 
-  math_form       = "For any accepted evolution step k → k+1, E_SUGAR, E_PROTEIN, E_BLOOD, SafetyStrength, HealthStrength are non-decreasing while RoH is non-increasing.";
+@constraint hex_encoding
+  formula: "len(codeword.hex_block) == codeword.digit_count * 4"
+  description: "Hex encoding must match digit count (4 hex digits per scaled value)"
+  enforcement: hard
+@end
 
-  inequality {
-    lhs_expr      = "tuple_diff( E_SUGAR_k1 - E_SUGAR_k, E_PROTEIN_k1 - E_PROTEIN_k, E_BLOOD_k1 - E_BLOOD_k, SafetyStrength_k1 - SafetyStrength_k, HealthStrength_k1 - HealthStrength_k, RoH_k1 - RoH_k )";
-    op            = "charter_monotone";   # interpreted by charter-proof engine
-    rhs_expr      = ">=_for_energy_safety_<=_for_RoH";
-  }
+@constraint l1_consistency
+  formula: "codeword.l1_norm == sum(scaled_state_values)"
+  description: "L1 norm must match sum of scaled state values"
+  enforcement: hard
+@end
 
-  status          = "candidate";
-  evidence_shard  = "QPU.Datashard://biomem/H5/evolution_logs.v1";
-}
+# ----------------------------------------------------------------------------
+# SECTION: VALIDATION RULES
+# ----------------------------------------------------------------------------
+
+@section validation_rules
+
+@rule pre_encode_validation
+  trigger: before_encode
+  checks:
+    - "sample.RoH in [0.0, 1.0]"
+    - "sample.KnowledgeFactor in [0.0, 1.0]"
+    - "sample.SafetyStrength in [0.0, 1.0]"
+    - "not_nan(sample.x_mm)"
+    - "not_nan(sample.y_mm)"
+    - "not_nan(sample.z_mm)"
+    - "sample.t_sec >= 0.0"
+    - "sample.bandpower_theta >= 0.01"
+    - "sample.coherence_dm in [0.0, 1.0]"
+  action: reject_if_fail
+@end
+
+@rule post_encode_validation
+  trigger: after_encode
+  checks:
+    - "risk_context.RoH <= 0.30"
+    - "risk_context.SafetyStrength >= 0.75"
+    - "risk_context.KnowledgeFactor >= 0.50"
+    - "trace.validate_all() == true"
+    - "trace.id not_empty"
+    - "trace.version matches_semver"
+  action: reject_if_fail
+@end
+
+@rule aln_compatibility
+  trigger: on_shard_load
+  checks:
+    - "shard.version >= 1.0.0"
+    - "shard.compatibility includes biomem-core"
+    - "all_invariants_satisfiable()"
+  action: warn_if_fail
+@end
+
+@rule cross_node_consistency
+  trigger: on_replication
+  checks:
+    - "trace_hash_matches_across_nodes()"
+    - "codeword.hex_block_identical()"
+    - "all_invariants_satisfied()"
+  action: quarantine_if_fail
+@end
+
+# ----------------------------------------------------------------------------
+# SECTION: HYPOTHESIS SCHEMA AND EXAMPLES (H1–H5)
+# ----------------------------------------------------------------------------
+
+@section hypothesis_schema
+
+@type biomem.5d.hypothesis.v1
+  id              : string
+  label           : string
+  description     : string
+  layer_scope     : string        # "L1" | "L2" | ... | "L1-L5"
+  math_form       : string        # human-readable equation/inequality
+  eval_window_sec : float32
+  feature_keys    : [string]
+  lhs_expr        : string        # ALN-executable scalar expression
+  op              : string        # "<=" | ">=" | "==" | "charter_monotone"
+  rhs_expr        : string
+  status          : string        # "candidate" | "validated" | "rejected"
+  evidence_shard  : string        # QPU.Datashard ref
+@end_type
+
+# H1–H5 are concrete hypothesis instances of biomem.5d.hypothesis.v1.
+
+@hypothesis biomem.H1.molecular_stability_under_recall.v1
+  id              = "biomem.H1.molecular_stability_under_recall.v1"
+  label           = "Molecular corridor during stable recall"
+  description     = "During stable recall epochs, the molecular L1 norm of σ^1 remains within a tight corridor, indicating bounded nanomolecular reconfiguration."
+  layer_scope     = "L1"
+  eval_window_sec = 2.0
+  feature_keys    = ["sigma_layer_1", "codeword.l1_norm", "risk_context.RoH"]
+  math_form       = "For any recall window W of length ≥ 2 s with RoH ≤ 0.3, Δ R_mol_L1(W) ≤ ε_mol."
+  lhs_expr        = "max_over_window(L1(sigma_layer_1)) - min_over_window(L1(sigma_layer_1))"
+  op              = "<="
+  rhs_expr        = "epsilon_mol"
+  status          = "candidate"
+  evidence_shard  = "QPU.Datashard://biomem/H1/logs.v1"
+@end
+
+@hypothesis biomem.H2.synaptic_recall_potentiation.v1
+  id              = "biomem.H2.synaptic_recall_potentiation.v1"
+  label           = "Synaptic potentiation signature of recall"
+  description     = "Successful recall trials show a reproducible positive shift in synaptic potentiation coordinates of σ^2 relative to matched baseline windows."
+  layer_scope     = "L2"
+  eval_window_sec = 3.0
+  feature_keys    = ["sigma_layer_2", "risk_context.KnowledgeFactor"]
+  math_form       = "E[Δ w_recall] ≥ θ_syn > 0 when KnowledgeFactor increases over the session."
+  lhs_expr        = "mean(sigma_layer_2[0:8]_recall) - mean(sigma_layer_2[0:8]_baseline)"
+  op              = ">="
+  rhs_expr        = "theta_syn"
+  status          = "candidate"
+  evidence_shard  = "QPU.Datashard://biomem/H2/logs.v1"
+@end
+
+@hypothesis biomem.H3.microcircuit_inhibition_corridor.v1
+  id              = "biomem.H3.microcircuit_inhibition_corridor.v1"
+  label           = "Microcircuit E/I corridor for stable recall"
+  description     = "Stable, low-RoH recall states occupy a restricted corridor of E/I ratios and inhibition strengths in σ^3."
+  layer_scope     = "L3"
+  eval_window_sec = 1.5
+  feature_keys    = ["sigma_layer_3", "risk_context.RoH"]
+  math_form       = "For recall with RoH ≤ 0.3, E_I_ratio_min ≤ E_I_ratio(t) ≤ E_I_ratio_max."
+  lhs_expr        = "max_over_window(sigma_layer_3[0])"
+  op              = "<="
+  rhs_expr        = "E_I_ratio_max"
+  status          = "candidate"
+  evidence_shard  = "QPU.Datashard://biomem/H3/logs.v1"
+@end
+
+@hypothesis biomem.H4.network_coupling_memory_band.v1
+  id              = "biomem.H4.network_coupling_memory_band.v1"
+  label           = "Network coupling band for memory expression"
+  description     = "During successful recall, network-level coupling between somatomotor and visual bands follows a reproducible ratio corridor in σ^4."
+  layer_scope     = "L4"
+  eval_window_sec = 2.0
+  feature_keys    = ["sigma_layer_4", "codeword.l1_norm", "risk_context.KnowledgeFactor"]
+  math_form       = "For recall epochs, ratio r = C_motor_alpha / C_vis_alpha lies in [r_min, r_max] and correlates with KnowledgeFactor."
+  lhs_expr        = "abs( (sigma_layer_4[16] / sigma_layer_4[18]) - r_star )"
+  op              = "<="
+  rhs_expr        = "delta_r"
+  status          = "candidate"
+  evidence_shard  = "QPU.Datashard://biomem/H4/logs.v1"
+@end
+
+@hypothesis biomem.H5.systemic_energy_safety_monotone.v1
+  id              = "biomem.H5.systemic_energy_safety_monotone.v1"
+  label           = "Systemic energy + safety monotonicity under learning"
+  description     = "Across learning-induced memory updates, systemic energy budgets and SafetyStrength form a non-degrading tuple, suitable for PoF + NFA charter binding."
+  layer_scope     = "L5"
+  eval_window_sec = 0.0
+  feature_keys    = [
+    "sigma_layer_5[9]",  "sigma_layer_5[10]",
+    "sigma_layer_5[11]", "risk_context.SafetyStrength",
+    "risk_context.HealthStrength", "risk_context.RoH"
+  ]
+  math_form       = "For any accepted evolution step k → k+1, E_SUGAR, E_PROTEIN, E_BLOOD, SafetyStrength, HealthStrength are non-decreasing while RoH is non-increasing."
+  lhs_expr        = "tuple_diff(E_SUGAR_k1 - E_SUGAR_k, E_PROTEIN_k1 - E_PROTEIN_k, E_BLOOD_k1 - E_BLOOD_k, SafetyStrength_k1 - SafetyStrength_k, HealthStrength_k1 - HealthStrength_k, RoH_k1 - RoH_k)"
+  op              = "charter_monotone"
+  rhs_expr        = ">=_for_energy_safety_<=_for_RoH"
+  status          = "candidate"
+  evidence_shard  = "QPU.Datashard://biomem/H5/evolution_logs.v1"
+@end
+
+# ----------------------------------------------------------------------------
+# SECTION: METADATA FOR EXTERNAL SYSTEMS
+# ----------------------------------------------------------------------------
+
+@section external_metadata
+
+@metrics prometheus_export
+  biomem_roh_current                : risk_context.RoH
+  biomem_knowledge_factor_current   : risk_context.KnowledgeFactor
+  biomem_safety_strength_current    : risk_context.SafetyStrength
+  biomem_complexity_current         : trace.complexity_score
+  biomem_nullspace_dim_current      : risk_context.nullspace_dim
+  biomem_encode_count_total         : encoder.encode_count
+  biomem_layer_dimensions           : trace.coord_state.total_dimension_count
+@end
+
+@sko wrapping_schema
+  modality.kind  : "biomem.trace"
+  topic          : "neuro.mem-trace"
+  payload_format : json
+  compression    : optional_gzip
+  encryption     : optional_aes256
+  signature      : required_ed25519
+  timestamp      : trace.created_at
+  hash           : trace.id
+@end
+
+@blockchain integration
+  shard_id             : "biomem.5d.v1"
+  on_chain_proof       : "trace.id + codeword.hex_block_hash"
+  consensus_requirement: invariant_satisfaction
+  smart_contract_hooks :
+    - on_trace_create: validate_invariants
+    - on_trace_update: check_monotonicity
+    - on_trace_export: verify_safety_strength
+@end
+
+@storage classification
+  class               : sovereign
+  offline_capable     : true
+  housing_protection  : true
+  neurorights_enforced: true
+  retention_policy    : indefinite
+  access_control      : capability_based
+@end
+
+# ----------------------------------------------------------------------------
+# SECTION: EXTENSION POINTS & COMPLIANCE
+# ----------------------------------------------------------------------------
+
+@section extension_points
+
+@extension molecular_proxies
+  status         : reserved
+  planned_version: 2.0.0
+  description    : "Nanomolecular storage mechanism proxies (receptor states, phosphorylation cascades)"
+@end
+
+@extension synaptic_proxies
+  status         : reserved
+  planned_version: 2.0.0
+  description    : "Synaptic plasticity mechanism proxies (LTP/LTD magnitudes, spine dynamics)"
+@end
+
+@extension multi_species_atlas
+  status         : planned
+  planned_version: 1.5.0
+  description    : "Support for non-human primate and rodent atlas coordinate systems"
+@end
+
+@extension streaming_traces
+  status         : planned
+  planned_version: 1.5.0
+  description    : "Incremental trace updates for real-time BCI applications"
+@end
+
+@section compliance
+
+@certification PoF_required
+  description     : "All traces must include Proof-of-Functionality evidence"
+  evidence_fields :
+    - trace.id
+    - codeword.hex_block
+    - trace.created_at
+    - sample_hash
+  verification    : cryptographic_hash
+@end
+
+@certification NFA_enabled
+  description : "Non-Fair-Allowances permit custom-fit implementations over strict compliance"
+  conditions  :
+    - "custom_implementation_satisfies_all_invariants()"
+    - "custom_implementation_provides_equal_or_better_safety()"
+    - "custom_implementation_documented_in_aln_shard()"
+  approval_process: curatorial_board_review
+@end
+
+@certification data_sovereignty
+  description: "Traces remain under augmented-citizen sovereignty control"
+  rights     :
+    - right_to_access
+    - right_to_portability
+    - right_to_audit
+    - right_to_revoke_with_monotonicity_preservation
+  enforcement: ALN_smart_contracts
+@end
+
+# ============================================================================
+# END OF SHARD
+# ============================================================================
+
+@end_shard biomem.5d.v1
+# @checksum sha256: [AUTO_COMPUTED_ON_BUILD]
+# @signature ed25519: [SIGN_ON_PUBLISH]
