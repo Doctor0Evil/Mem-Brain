@@ -1,0 +1,244 @@
+# ============================================================================
+# CRATE: biomem-encoder
+# PATH:  rust/crates/biomem-encoder/Cargo.toml
+# VER:   1.0.0
+# LIC:   MIT (Data_Lake Sovereign License)
+# DESC:  Package manifest for EEG/Network to MemoryTrace encoder.
+#        Provides PoF/NFA compliant encoding with ALN shard validation.
+# ============================================================================
+
+[package]
+name = "biomem-encoder"
+version = "1.0.0"
+edition = "2021"
+rust-version = "1.75.0"
+authors = ["Data_Lake Sovereign Research <research@data-lake.so>"]
+description = "Biomem encoder for converting EEG/network features into MemoryTrace objects with ALN-Blockchain compliance"
+license = "MIT"
+repository = "https://github.com/data-lake/mem-brain"
+homepage = "https://github.com/data-lake/mem-brain"
+documentation = "https://docs.rs/biomem-encoder"
+readme = "README.md"
+keywords = ["neuroscience", "bci", "eeg", "memory", "aln-blockchain"]
+categories = ["science", "encoding", "data-structures"]
+exclude = [".gitignore", "*.md", "tests/"]
+
+# ============================================================================
+# FEATURES
+# ============================================================================
+
+[features]
+default = ["std", "serde", "metrics"]
+std = []
+serde = ["dep:serde", "biomem-core/serde"]
+metrics = ["prometheus"]
+strict = []
+aln-shard = ["serde"]
+prometheus = ["dep:prometheus"]
+full = ["std", "serde", "metrics", "aln-shard", "prometheus"]
+
+# ============================================================================
+# DEPENDENCIES
+# ============================================================================
+
+[dependencies]
+# Core memory specification (required)
+biomem-core = { path = "../biomem-core", version = "1.0.0", default-features = false }
+
+# Serialization (required for SKO/ALN compatibility)
+serde = { version = "1.0", features = ["derive"], optional = true }
+serde_json = { version = "1.0", optional = true }
+
+# Error handling
+thiserror = { version = "1.0", default-features = false }
+
+# Metrics export (Prometheus)
+prometheus = { version = "0.13", optional = true, default-features = false }
+
+# Hashing for PoF evidence
+sha2 = { version = "0.10", default-features = false }
+
+# ============================================================================
+# DEVELOPMENT DEPENDENCIES
+# ============================================================================
+
+[dev-dependencies]
+# Testing utilities
+criterion = { version = "0.5", features = ["html_reports"] }
+tempfile = "3.10"
+rand = "0.8"
+
+# ============================================================================
+# BUILD DEPENDENCIES
+# ============================================================================
+
+[build-dependencies]
+# None required for this crate
+
+# ============================================================================
+# LIBRARY CONFIGURATION
+# ============================================================================
+
+[lib]
+name = "biomem_encoder"
+path = "src/lib.rs"
+crate-type = ["lib"]
+doctest = true
+test = true
+bench = true
+
+# ============================================================================
+# EXAMPLES
+# ============================================================================
+
+[[example]]
+name = "eeg_network_to_trace"
+path = "../../examples/eeg_network_to_trace/src/main.rs"
+required-features = ["serde", "metrics"]
+
+[[example]]
+name = "prometheus-exporter"
+path = "../../examples/prometheus-exporter/src/main.rs"
+required-features = ["prometheus", "serde"]
+
+# ============================================================================
+# TESTS
+# ============================================================================
+
+[[test]]
+name = "encoder_integration"
+path = "tests/integration.rs"
+required-features = ["serde"]
+
+[[test]]
+name = "aln_shard_validation"
+path = "tests/aln_validation.rs"
+required-features = ["aln-shard", "serde"]
+
+# ============================================================================
+# BENCHMARKS
+# ============================================================================
+
+[[bench]]
+name = "encoding_benchmark"
+path = "benches/encoding.rs"
+harness = false
+required-features = ["metrics"]
+
+# ============================================================================
+# DOCUMENTATION
+# ============================================================================
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
+targets = ["x86_64-unknown-linux-gnu"]
+
+# ============================================================================
+# LINTING
+# ============================================================================
+
+[lints.rust]
+unsafe_code = "deny"
+missing_docs = "warn"
+rust_2018_idioms = "warn"
+
+[lints.clippy]
+all = "warn"
+pedantic = "warn"
+nursery = "warn"
+cargo = "warn"
+unwrap_used = "deny"
+expect_used = "deny"
+panic = "deny"
+todo = "deny"
+fixme = "deny"
+
+# ============================================================================
+# PUBLISH CONFIGURATION
+# ============================================================================
+
+[package.metadata.release]
+pre-release-replacements = [
+    { file = "src/lib.rs", search = "pub const VERSION: &str = \"[^\"]+\";", replace = "pub const VERSION: &str = \"{{version}}\";", exactly = 1 }
+]
+
+# ============================================================================
+# PROFILE OPTIMIZATIONS
+# ============================================================================
+
+[profile.release]
+opt-level = 3
+lto = "thin"
+codegen-units = 1
+panic = "abort"
+strip = true
+
+[profile.dev]
+opt-level = 0
+debug = true
+debug-assertions = true
+overflow-checks = true
+
+[profile.bench]
+opt-level = 3
+lto = "thin"
+codegen-units = 1
+
+# ============================================================================
+# PLATFORM SPECIFIC DEPENDENCIES
+# ============================================================================
+
+[target.'cfg(target_os = "linux")'.dependencies]
+# Linux-specific optimizations
+libc = { version = "0.2", optional = true }
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+# WebAssembly compatibility (for Reality.os bindings)
+wasm-bindgen = { version = "0.2", optional = true }
+js-sys = { version = "0.3", optional = true }
+
+[target.'cfg(target_arch = "wasm32")'.dev-dependencies]
+wasm-bindgen-test = "0.3"
+
+# ============================================================================
+# WORKSPACE CONFIGURATION (if part of workspace)
+# ============================================================================
+
+[workspace]
+members = [
+    "../biomem-core",
+    ".",
+]
+resolver = "2"
+
+[workspace.package]
+license = "MIT"
+edition = "2021"
+rust-version = "1.75.0"
+
+[workspace.lints.rust]
+unsafe_code = "deny"
+missing_docs = "warn"
+
+[workspace.lints.clippy]
+all = "warn"
+pedantic = "warn"
+
+# ============================================================================
+# METADATA FOR ALN-BLOCKCHAIN INTEGRATION
+# ============================================================================
+
+[package.metadata.aln]
+shard-compatible = true
+pof-required = true
+nfa-enabled = true
+min-safety-strength = 0.75
+max-roh = 0.30
+min-knowledge-factor = 0.50
+
+[package.metadata.data_lake]
+storage-class = "sovereign"
+offline-capable = true
+housing-protection = true
+neurorights-enforced = true
